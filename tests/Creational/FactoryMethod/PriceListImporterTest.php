@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Tests\Creational\FactoryMethod;
 
-use DesignPatterns\Creational\FactoryMethod\FarmacolPriceListImporter;
-use DesignPatterns\Creational\FactoryMethod\NeucaPriceListImporter;
+use DesignPatterns\Creational\FactoryMethod\Farmacol\FarmacolPriceListImporter;
+use DesignPatterns\Creational\FactoryMethod\Neuca\NeucaPriceListImporter;
 use DesignPatterns\Creational\FactoryMethod\PriceListEntry;
 use DesignPatterns\Creational\FactoryMethod\PriceListImporter;
 use PHPUnit\Framework\Attributes\CoversClass;

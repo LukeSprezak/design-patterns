@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Creational\FactoryMethod;
+namespace DesignPatterns\Tests\Creational\FactoryMethod\Farmacol;
 
-use DesignPatterns\Creational\FactoryMethod\FarmacolXmlParser;
+use DesignPatterns\Creational\FactoryMethod\Farmacol\FarmacolXmlParser;
 use DesignPatterns\Creational\FactoryMethod\PriceListEntry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;

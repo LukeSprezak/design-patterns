@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Creational\FactoryMethod;
+namespace DesignPatterns\Creational\FactoryMethod\Neuca;
+
+use DesignPatterns\Creational\FactoryMethod\PriceListImporter;
+use DesignPatterns\Creational\FactoryMethod\PriceListParser;
 
 final class NeucaPriceListImporter extends PriceListImporter
 {

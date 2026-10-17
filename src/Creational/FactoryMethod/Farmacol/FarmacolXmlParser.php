@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Creational\FactoryMethod;
+namespace DesignPatterns\Creational\FactoryMethod\Farmacol;
 
+use DesignPatterns\Creational\FactoryMethod\PriceListEntry;
+use DesignPatterns\Creational\FactoryMethod\PriceListParser;
 use SimpleXMLElement;
 
 final class FarmacolXmlParser implements PriceListParser
