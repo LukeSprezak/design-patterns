@@ -21,71 +21,73 @@ final class PriceListImporterTest extends TestCase
     #[Test]
     public function importsValidEntries(): void
     {
-        $csv = <<<CSV
+        $priceListCsv = <<<CSV
         EAN;NAME;NET_PRICE;VAT
         5901234123457;Apap 500mg 12 tablets;7,49;8
         5909998887776;Ibuprom Max 400mg 24 tablets;15,90;8
         CSV;
 
-        $result = new NeucaPriceListImporter()->import($csv);
+        $importResult = new NeucaPriceListImporter()->import($priceListCsv);
 
         self::assertEquals(
             [
                 new PriceListEntry('5901234123457', 'Apap 500mg 12 tablets', 749, 8),
                 new PriceListEntry('5909998887776', 'Ibuprom Max 400mg 24 tablets', 1590, 8),
             ],
-            $result->imported,
+            $importResult->importedEntries,
         );
-        self::assertSame([], $result->rejected);
+        self::assertSame([], $importResult->rejectionReasons);
     }
 
     #[Test]
     public function rejectsEntryWithInvalidEanChecksum(): void
     {
-        $csv = <<<CSV
+        $priceListCsv = <<<CSV
         EAN;NAME;NET_PRICE;VAT
         5901234123450;Apap 500mg 12 tablets;7,49;8
         CSV;
 
-        $result = new NeucaPriceListImporter()->import($csv);
+        $importResult = new NeucaPriceListImporter()->import($priceListCsv);
 
-        self::assertSame([], $result->imported);
-        self::assertSame(['5901234123450: invalid EAN code'], $result->rejected);
+        self::assertSame([], $importResult->importedEntries);
+        self::assertSame(['5901234123450: invalid EAN code'], $importResult->rejectionReasons);
     }
 
     #[Test]
     public function rejectsDuplicatedEanKeepingFirstOccurrence(): void
     {
-        $csv = <<<CSV
+        $priceListCsv = <<<CSV
         EAN;NAME;NET_PRICE;VAT
         5901234123457;Apap 500mg 12 tablets;7,49;8
         5901234123457;Apap 500mg 12 tablets;7,99;8
         CSV;
 
-        $result = new NeucaPriceListImporter()->import($csv);
+        $importResult = new NeucaPriceListImporter()->import($priceListCsv);
 
         self::assertEquals(
             [new PriceListEntry('5901234123457', 'Apap 500mg 12 tablets', 749, 8)],
-            $result->imported,
+            $importResult->importedEntries,
         );
-        self::assertSame(['5901234123457: duplicated EAN code'], $result->rejected);
+        self::assertSame(['5901234123457: duplicated EAN code'], $importResult->rejectionReasons);
     }
 
     #[Test]
-    #[DataProvider('wholesalers')]
-    public function sameImportRulesApplyToEveryWholesaler(PriceListImporter $importer, string $content): void
-    {
-        $result = $importer->import($content);
+    #[DataProvider('wholesalerPriceLists')]
+    public function sameImportRulesApplyToEveryWholesaler(
+        PriceListImporter $priceListImporter,
+        string $priceListFileContent,
+    ): void {
+        $importResult = $priceListImporter->import($priceListFileContent);
 
-        self::assertCount(1, $result->imported);
+        self::assertCount(1, $importResult->importedEntries);
         self::assertSame(
             ['5901234123457: duplicated EAN code', '1234567890123: invalid EAN code'],
-            $result->rejected,
+            $importResult->rejectionReasons,
         );
     }
 
     /** @return iterable<string, array{PriceListImporter, string}> */
-    public static function wholesalers(): iterable
+    public static function wholesalerPriceLists(): iterable
     {
         yield 'Neuca CSV' => [
             new NeucaPriceListImporter(),

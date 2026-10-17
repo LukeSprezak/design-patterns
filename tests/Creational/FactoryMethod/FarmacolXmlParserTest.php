@@ -16,7 +16,7 @@ final class FarmacolXmlParserTest extends TestCase
     #[Test]
     public function parsesItemElementsWithDotDecimalPrice(): void
     {
-        $xml = <<<XML
+        $priceListXml = <<<XML
         <?xml version="1.0" encoding="UTF-8"?>
         <priceList>
             <item ean="5901234123457" name="Apap 500mg 12 tablets" netPrice="7.49" vat="8"/>
@@ -24,14 +24,14 @@ final class FarmacolXmlParserTest extends TestCase
         </priceList>
         XML;
 
-        $entries = new FarmacolXmlParser()->parse($xml);
+        $priceListEntries = new FarmacolXmlParser()->parse($priceListXml);
 
         self::assertEquals(
             [
                 new PriceListEntry('5901234123457', 'Apap 500mg 12 tablets', 749, 8),
                 new PriceListEntry('5901112223330', 'Rutinoscorbin 90 tablets', 2100, 8),
             ],
-            $entries,
+            $priceListEntries,
         );
     }
 }
