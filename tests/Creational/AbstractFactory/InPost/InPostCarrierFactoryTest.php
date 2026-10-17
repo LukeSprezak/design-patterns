@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Creational\AbstractFactory;
+namespace DesignPatterns\Tests\Creational\AbstractFactory\InPost;
 
-use DesignPatterns\Creational\AbstractFactory\InPostCarrierFactory;
+use DesignPatterns\Creational\AbstractFactory\InPost\InPostCarrierFactory;
+use DesignPatterns\Creational\AbstractFactory\InPost\ParcelDoesNotFitLockerException;
 use DesignPatterns\Creational\AbstractFactory\Parcel;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 
 #[CoversClass(InPostCarrierFactory::class)]
 final class InPostCarrierFactoryTest extends TestCase
@@ -20,6 +23,19 @@ final class InPostCarrierFactoryTest extends TestCase
         $trackingNumber = new InPostCarrierFactory()->createTrackingNumberGenerator()->generate();
 
         self::assertMatchesRegularExpression('/^\d{24}$/', $trackingNumber);
+    }
+
+    #[Test]
+    public function generatesSameTrackingNumberForSameRandomSeed(): void
+    {
+        $firstTrackingNumber = new InPostCarrierFactory(new Randomizer(new Mt19937(seed: 42)))
+            ->createTrackingNumberGenerator()
+            ->generate();
+        $secondTrackingNumber = new InPostCarrierFactory(new Randomizer(new Mt19937(seed: 42)))
+            ->createTrackingNumberGenerator()
+            ->generate();
+
+        self::assertSame($firstTrackingNumber, $secondTrackingNumber);
     }
 
     #[Test]
@@ -45,6 +61,15 @@ final class InPostCarrierFactoryTest extends TestCase
         self::assertStringContainsString('Jan Kowalski', $label);
     }
 
+    #[Test]
+    #[DataProvider('parcelsExceedingLockerDimensions')]
+    public function rejectsParcelThatDoesNotFitAnyLocker(Parcel $parcel): void
+    {
+        $this->expectException(ParcelDoesNotFitLockerException::class);
+
+        new InPostCarrierFactory()->createShippingCostCalculator()->calculate($parcel);
+    }
+
     /** @return iterable<string, array{Parcel, string}> */
     public static function parcelsWithExpectedSize(): iterable
     {
@@ -60,6 +85,14 @@ final class InPostCarrierFactoryTest extends TestCase
         yield 'size A' => [self::parcelWithDimensions(64, 38, 8), 1299];
         yield 'size B' => [self::parcelWithDimensions(30, 20, 15), 1499];
         yield 'size C' => [self::parcelWithDimensions(60, 35, 40), 1899];
+    }
+
+    /** @return iterable<string, array{Parcel}> */
+    public static function parcelsExceedingLockerDimensions(): iterable
+    {
+        yield 'too long' => [self::parcelWithDimensions(70, 30, 10)];
+        yield 'too wide even though flat' => [self::parcelWithDimensions(64, 45, 8)];
+        yield 'too deep' => [self::parcelWithDimensions(60, 38, 42)];
     }
 
     private static function parcelWithDimensions(int $length, int $width, int $height): Parcel

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DesignPatterns\Tests\Creational\AbstractFactory;
 
 use DesignPatterns\Creational\AbstractFactory\CarrierFactory;
-use DesignPatterns\Creational\AbstractFactory\DhlCarrierFactory;
-use DesignPatterns\Creational\AbstractFactory\InPostCarrierFactory;
+use DesignPatterns\Creational\AbstractFactory\Dhl\DhlCarrierFactory;
+use DesignPatterns\Creational\AbstractFactory\InPost\InPostCarrierFactory;
 use DesignPatterns\Creational\AbstractFactory\Parcel;
 use DesignPatterns\Creational\AbstractFactory\ShipmentService;
 use PHPUnit\Framework\Attributes\CoversClass;

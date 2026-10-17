@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Creational\AbstractFactory;
+namespace DesignPatterns\Creational\AbstractFactory\InPost;
+
+use DesignPatterns\Creational\AbstractFactory\Parcel;
+use DesignPatterns\Creational\AbstractFactory\ShippingLabelGenerator;
 
 final class InPostShippingLabelGenerator implements ShippingLabelGenerator
 {

@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Creational\AbstractFactory;
+namespace DesignPatterns\Tests\Creational\AbstractFactory\Dhl;
 
-use DesignPatterns\Creational\AbstractFactory\DhlCarrierFactory;
+use DesignPatterns\Creational\AbstractFactory\Dhl\DhlCarrierFactory;
 use DesignPatterns\Creational\AbstractFactory\Parcel;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 
 #[CoversClass(DhlCarrierFactory::class)]
 final class DhlCarrierFactoryTest extends TestCase
@@ -20,6 +22,19 @@ final class DhlCarrierFactoryTest extends TestCase
         $trackingNumber = new DhlCarrierFactory()->createTrackingNumberGenerator()->generate();
 
         self::assertMatchesRegularExpression('/^JD\d{18}$/', $trackingNumber);
+    }
+
+    #[Test]
+    public function generatesSameTrackingNumberForSameRandomSeed(): void
+    {
+        $firstTrackingNumber = new DhlCarrierFactory(new Randomizer(new Mt19937(seed: 42)))
+            ->createTrackingNumberGenerator()
+            ->generate();
+        $secondTrackingNumber = new DhlCarrierFactory(new Randomizer(new Mt19937(seed: 42)))
+            ->createTrackingNumberGenerator()
+            ->generate();
+
+        self::assertSame($firstTrackingNumber, $secondTrackingNumber);
     }
 
     #[Test]
