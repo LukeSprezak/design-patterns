@@ -1,0 +1,24 @@
+{
+    "name": "lsprezak/design-patterns",
+    "description": "Design patterns in PHP",
+    "type": "project",
+    "require": {
+        "php": "^8.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DesignPatterns\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DesignPatterns\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
