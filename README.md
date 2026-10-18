@@ -31,6 +31,17 @@ Fiscal printer connection in a pharmacy: the printer sits on one serial port and
 
 Use it only when "exactly one per process" is a hardware or protocol constraint that must hold regardless of configuration. In every other case register a plain class as a shared service in the DI container: it gives one instance too, but stays testable, replaceable and free of global state.
 
+## Enterprise (PoEAA)
+
+Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
+
+### Domain Logic
+
+#### Transaction Script – `src/Enterprise/DomainLogic/TransactionScript`
+Pharmacy sales as procedures on a PDO connection: `dispensePrescription()` loads the prescription row, checks expiry and prior dispensing, reduces stock, charges the patient by refund level, records the sale and commits, rolling back on any failure; `sellOverTheCounter()` does the simpler counterpart. Logic is procedural, data stays as rows, and there are no domain objects.
+
+Use it for simple domain logic with few rules, where one procedure per request stays readable, or for small systems and prototypes. As rules grow, scripts start duplicating each other (stock checks and sale recording already appear twice here) and that is the moment to move to a Domain Model.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -57,3 +68,14 @@ Stosuj, gdy nowy obiekt jest w większości kopią istniejącego, skonfigurowane
 Połączenie z drukarką fiskalną w aptece: drukarka wisi na jednym porcie szeregowym i prowadzi ciągłą numerację paragonów, więc drugie połączenie w tym samym procesie by ją zepsuło. Klasa sama wymusza jedną instancję przez `getInstance()`, prywatny konstruktor, prywatne `__clone()` i `__unserialize()` rzucające wyjątek.
 
 Stosuj tylko wtedy, gdy „dokładnie jedna na proces” wynika ze sprzętu lub protokołu i musi obowiązywać niezależnie od konfiguracji. W każdym innym przypadku zarejestruj zwykłą klasę jako shared service w kontenerze DI: też daje jedną instancję, ale pozostaje testowalna, podmienialna i wolna od globalnego stanu.
+
+## Korporacyjne (PoEAA)
+
+Wzorce z książki Martina Fowlera *Patterns of Enterprise Application Architecture*, pogrupowane tak jak w książce.
+
+### Logika domenowa
+
+#### Transaction Script – `src/Enterprise/DomainLogic/TransactionScript`
+Sprzedaż w aptece jako procedury na połączeniu PDO: `dispensePrescription()` wczytuje wiersz recepty, sprawdza ważność i wcześniejszą realizację, zdejmuje ze stanu, nalicza dopłatę pacjenta po poziomie refundacji, zapisuje sprzedaż i robi commit, a przy każdym błędzie rollback; `sellOverTheCounter()` to prostszy odpowiednik. Logika jest proceduralna, dane zostają wierszami, obiektów domenowych nie ma.
+
+Stosuj przy prostej logice z niewieloma regułami, gdzie jedna procedura na żądanie pozostaje czytelna, oraz w małych systemach i prototypach. Gdy reguł przybywa, skrypty zaczynają się powielać (sprawdzanie stanu i zapis sprzedaży już tu występują dwa razy) i to jest moment na przejście do Domain Model.

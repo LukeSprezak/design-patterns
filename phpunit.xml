@@ -9,6 +9,9 @@
         <testsuite name="Creational">
             <directory>tests/Creational</directory>
         </testsuite>
+        <testsuite name="Enterprise">
+            <directory>tests/Enterprise</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
