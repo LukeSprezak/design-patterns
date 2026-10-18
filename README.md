@@ -52,6 +52,11 @@ Use it when business rules are many, interlinked and change often, and the cost 
 
 Use it when several clients (web, API, CLI, queue consumer) need the same use cases, or when a use case has to coordinate transactions, persistence and notifications around domain logic. Skip it when there is one client and the Domain Model can be called directly from the controller.
 
+#### Table Module – `src/Enterprise/DomainLogic/TableModule`
+Monthly settlement of ambulance dispatches: one class per database table (`Tariffs`, `Dispatches`), one instance per class, methods that take a row id (`isBillable()`, `priceInCents()`) or work over the whole table (`settlementForMonth()`), with data staying as rows the entire time. Logic is organised by table rather than by request (Transaction Script) or by object (Domain Model).
+
+Use it when logic is mostly tabular (rates, sums, filtering) and the platform provides a Record Set the UI and logic can share, as `DataSet` does in .NET. In PHP that infrastructure is missing, so a Domain Model or a Transaction Script almost always fits better; this one is here for completeness and comparison.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -99,3 +104,8 @@ Stosuj, gdy reguł biznesowych jest dużo, są powiązane i często się zmienia
 `PharmacyService` to granica aplikacji nad Domain Model: jedna metoda na przypadek użycia (`dispensePrescription()`, `sellOverTheCounter()`), z których każda otwiera transakcję, wczytuje obiekty przez interfejsy repozytoriów, woła jedną metodę domenową, zapisuje to, co się zmieniło, i zwraca prosty wynik dla warstwy prezentacji. Sam nie zawiera reguł biznesowych, tylko koordynację.
 
 Stosuj, gdy kilku klientów (web, API, CLI, konsument kolejki) potrzebuje tych samych przypadków użycia, albo gdy przypadek użycia musi skoordynować transakcję, zapis i powiadomienia wokół logiki domenowej. Pomiń, gdy klient jest jeden i Domain Model można wołać wprost z kontrolera.
+
+#### Table Module – `src/Enterprise/DomainLogic/TableModule`
+Miesięczne rozliczenie wyjazdów pogotowia: jedna klasa na tabelę w bazie (`Tariffs`, `Dispatches`), jedna instancja na klasę, metody biorące id wiersza (`isBillable()`, `priceInCents()`) albo działające na całej tabeli (`settlementForMonth()`), a dane przez cały czas pozostają wierszami. Logika jest zorganizowana po tabelach, a nie po żądaniach (Transaction Script) ani po obiektach (Domain Model).
+
+Stosuj, gdy logika jest głównie „tabelowa” (stawki, sumy, filtrowanie), a platforma daje Record Set współdzielony przez UI i logikę, jak `DataSet` w .NET. W PHP tej infrastruktury nie ma, więc Domain Model albo Transaction Script prawie zawsze pasują lepiej; ten wzorzec jest tu dla kompletu i porównania.
