@@ -21,6 +21,11 @@ Issuing an e-prescription: patient, prescriber and medications are added step by
 
 Use it when an object is assembled in many steps, parts are optional, and invariants depend on the combination of parts. For a value object with a handful of fields, named arguments and a constructor are enough.
 
+### Prototype – `src/Creational/Prototype`
+Product variants in a PIM: a fully configured base product (description, material, categories, images, price) is the prototype, and each size/colour variant is a clone that overrides only SKU, size, colour and optionally price. `__clone()` resets the database id so a variant is persisted as a new record instead of overwriting the prototype.
+
+Use it when a new object is mostly a copy of an existing, already configured one and rebuilding it through the constructor would mean repeating a dozen fields. Beware of shallow copies: readonly value objects can be shared between clones, mutable nested objects must be deep-copied in `__clone()`.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -37,3 +42,8 @@ Stosuj, gdy klient potrzebuje rodziny obiektów, które muszą do siebie pasowa�
 Wystawianie e-recepty: pacjent, lekarz i leki są dodawane krok po kroku, a `build()` egzekwuje reguły obejmujące kilka kroków naraz (maksymalnie pięć leków, numer uprawnienia przy leku kontrolowanym, ważność 7 dni przy antybiotyku), zanim powstanie niemutowalna `Prescription`.
 
 Stosuj, gdy obiekt powstaje w wielu krokach, część danych jest opcjonalna, a poprawność zależy od kombinacji części. Dla value objectu z kilkoma polami wystarczą named arguments i konstruktor.
+
+### Prototype – `src/Creational/Prototype`
+Warianty produktu w systemie PIM: w pełni skonfigurowany produkt bazowy (opis, materiał, kategorie, zdjęcia, cena) jest prototypem, a każdy wariant rozmiar/kolor to klon nadpisujący tylko SKU, rozmiar, kolor i opcjonalnie cenę. `__clone()` zeruje id z bazy, żeby wariant zapisał się jako nowy rekord, a nie nadpisał prototypu.
+
+Stosuj, gdy nowy obiekt jest w większości kopią istniejącego, skonfigurowanego obiektu, a budowanie go przez konstruktor oznaczałoby powtórzenie kilkunastu pól. Uważaj na płytką kopię: value objecty `readonly` można dzielić między klonami, mutowalne obiekty zagnieżdżone trzeba kopiować głęboko w `__clone()`.
