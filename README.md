@@ -42,6 +42,11 @@ Pharmacy sales as procedures on a PDO connection: `dispensePrescription()` loads
 
 Use it for simple domain logic with few rules, where one procedure per request stays readable, or for small systems and prototypes. As rules grow, scripts start duplicating each other (stock checks and sale recording already appear twice here) and that is the moment to move to a Domain Model.
 
+#### Domain Model – `src/Enterprise/DomainLogic/DomainModel`
+The same pharmacy sale as objects with behaviour: `RefundLevel` knows how to price a package, `Medication` guards and reduces its own stock, `Prescription::dispense()` checks expiry and prior dispensing and produces a `Sale`, and `Sale::overTheCounter()` reuses the very same `Medication::dispense()`. Each rule lives in exactly one place; the duplication of the Transaction Script is gone. Loading and saving these objects is deliberately absent, that is the job of the data source patterns.
+
+Use it when business rules are many, interlinked and change often, and the cost of designing objects pays back in every new feature. For a thin CRUD application with a handful of rules it is heavier than a Transaction Script.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -79,3 +84,8 @@ Wzorce z książki Martina Fowlera *Patterns of Enterprise Application Architect
 Sprzedaż w aptece jako procedury na połączeniu PDO: `dispensePrescription()` wczytuje wiersz recepty, sprawdza ważność i wcześniejszą realizację, zdejmuje ze stanu, nalicza dopłatę pacjenta po poziomie refundacji, zapisuje sprzedaż i robi commit, a przy każdym błędzie rollback; `sellOverTheCounter()` to prostszy odpowiednik. Logika jest proceduralna, dane zostają wierszami, obiektów domenowych nie ma.
 
 Stosuj przy prostej logice z niewieloma regułami, gdzie jedna procedura na żądanie pozostaje czytelna, oraz w małych systemach i prototypach. Gdy reguł przybywa, skrypty zaczynają się powielać (sprawdzanie stanu i zapis sprzedaży już tu występują dwa razy) i to jest moment na przejście do Domain Model.
+
+#### Domain Model – `src/Enterprise/DomainLogic/DomainModel`
+Ta sama sprzedaż apteczna jako obiekty z zachowaniem: `RefundLevel` wie, jak wycenić opakowanie, `Medication` pilnuje i zdejmuje własny stan, `Prescription::dispense()` sprawdza ważność i wcześniejszą realizację i tworzy `Sale`, a `Sale::overTheCounter()` używa tego samego `Medication::dispense()`. Każda reguła jest w dokładnie jednym miejscu; duplikacja z Transaction Script zniknęła. Wczytywania i zapisu tych obiektów celowo nie ma, to zadanie wzorców źródła danych.
+
+Stosuj, gdy reguł biznesowych jest dużo, są powiązane i często się zmieniają, a koszt zaprojektowania obiektów zwraca się przy każdej nowej funkcji. Dla cienkiej aplikacji CRUD z garstką reguł jest cięższy niż Transaction Script.

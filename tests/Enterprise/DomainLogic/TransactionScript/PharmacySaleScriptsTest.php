@@ -100,11 +100,20 @@ final class PharmacySaleScriptsTest extends TestCase
     #[Test]
     public function overTheCounterSaleChargesFullPriceAndReducesStock(): void
     {
-        $amountToPayInCents = $this->pharmacySaleScripts->sellOverTheCounter('5901234123457', 3);
+        $amountToPayInCents = $this->pharmacySaleScripts->sellOverTheCounter('5901234123457', 3, new DateTimeImmutable('2026-10-18'));
 
         self::assertSame(3 * 749, $amountToPayInCents);
         self::assertSame(['Amoxicillin 500 mg' => 1, 'Apap 500 mg' => 7, 'Insulin Lantus' => 3], $this->stockLevels());
         self::assertSame(1, $this->countRows('sales'));
+    }
+
+    #[Test]
+    public function overTheCounterSaleRejectsUnknownEan(): void
+    {
+        $this->expectException(DispensingException::class);
+        $this->expectExceptionMessage('0000000000000');
+
+        (void) $this->pharmacySaleScripts->sellOverTheCounter('0000000000000', 1, new DateTimeImmutable('2026-10-18'));
     }
 
     /** @return array<string, int> medication name => stock */
