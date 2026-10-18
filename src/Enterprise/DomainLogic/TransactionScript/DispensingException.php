@@ -13,6 +13,11 @@ final class DispensingException extends DomainException
         return new self("Prescription {$prescriptionId} not found");
     }
 
+    public static function medicationNotFound(string $ean): self
+    {
+        return new self("Medication with EAN {$ean} not found");
+    }
+
     public static function alreadyDispensed(int $prescriptionId, string $dispensedAt): self
     {
         return new self("Prescription {$prescriptionId} was already dispensed at {$dispensedAt}");

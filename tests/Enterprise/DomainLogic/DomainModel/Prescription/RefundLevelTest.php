@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel;
+namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel\Prescription;
 
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\RefundLevel;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\RefundLevel;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

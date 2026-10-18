@@ -93,14 +93,14 @@ final readonly class PharmacySaleScripts
     }
 
     #[\NoDiscard('the amount to pay must be handed to the cash register')]
-    public function sellOverTheCounter(string $ean, int $quantity, DateTimeImmutable $today = new DateTimeImmutable()): int
+    public function sellOverTheCounter(string $ean, int $quantity, DateTimeImmutable $today): int
     {
         $this->connection->beginTransaction();
         try {
             $medication = $this->fetchOne(
                 'SELECT name, price_in_cents, stock FROM medications WHERE ean = :ean',
                 ['ean' => $ean],
-            );
+            ) ?? throw DispensingException::medicationNotFound($ean);
             if ($medication['stock'] < $quantity) {
                 throw DispensingException::insufficientStock($medication['name'], $quantity, $medication['stock']);
             }

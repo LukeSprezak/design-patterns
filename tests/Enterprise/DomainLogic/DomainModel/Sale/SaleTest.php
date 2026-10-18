@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel;
+namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel\Sale;
 
 use DateTimeImmutable;
 use DesignPatterns\Enterprise\DomainLogic\DomainModel\DispensingException;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\Medication;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\Sale;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Medication\Medication;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Sale\Sale;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

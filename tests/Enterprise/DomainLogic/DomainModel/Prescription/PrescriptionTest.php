@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel;
+namespace DesignPatterns\Tests\Enterprise\DomainLogic\DomainModel\Prescription;
 
 use DateTimeImmutable;
 use DesignPatterns\Enterprise\DomainLogic\DomainModel\DispensingException;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\Medication;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\PrescriptionItem;
-use DesignPatterns\Enterprise\DomainLogic\DomainModel\RefundLevel;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Medication\Medication;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\Prescription;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\PrescriptionItem;
+use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\RefundLevel;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
