@@ -2,7 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Creational\Builder;
+namespace DesignPatterns\Creational\Builder\Prescription;
+
+use DesignPatterns\Creational\Builder\InvalidPrescriptionException;
+use DesignPatterns\Creational\Builder\Medication\Medication;
+use DesignPatterns\Creational\Builder\Medication\MedicationCategory;
+use DesignPatterns\Creational\Builder\Patient;
+use DesignPatterns\Creational\Builder\Prescriber;
 
 final class PrescriptionBuilder
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DesignPatterns\Tests\Creational\Builder;
+namespace DesignPatterns\Tests\Creational\Builder\Prescription;
 
 use DesignPatterns\Creational\Builder\InvalidPrescriptionException;
-use DesignPatterns\Creational\Builder\Medication;
-use DesignPatterns\Creational\Builder\MedicationCategory;
+use DesignPatterns\Creational\Builder\Medication\Medication;
+use DesignPatterns\Creational\Builder\Medication\MedicationCategory;
 use DesignPatterns\Creational\Builder\Patient;
 use DesignPatterns\Creational\Builder\Prescriber;
-use DesignPatterns\Creational\Builder\PrescriptionBuilder;
+use DesignPatterns\Creational\Builder\Prescription\PrescriptionBuilder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

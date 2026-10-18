@@ -47,6 +47,11 @@ The same pharmacy sale as objects with behaviour: `RefundLevel` knows how to pri
 
 Use it when business rules are many, interlinked and change often, and the cost of designing objects pays back in every new feature. For a thin CRUD application with a handful of rules it is heavier than a Transaction Script.
 
+#### Service Layer – `src/Enterprise/DomainLogic/ServiceLayer`
+`PharmacyService` is the application's boundary on top of the Domain Model: one method per use case (`dispensePrescription()`, `sellOverTheCounter()`), each of which opens a transaction, loads objects through repository interfaces, calls a single domain method, saves what changed and returns a plain result for the presentation layer. It contains no business rules itself, only coordination.
+
+Use it when several clients (web, API, CLI, queue consumer) need the same use cases, or when a use case has to coordinate transactions, persistence and notifications around domain logic. Skip it when there is one client and the Domain Model can be called directly from the controller.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -89,3 +94,8 @@ Stosuj przy prostej logice z niewieloma regułami, gdzie jedna procedura na żą
 Ta sama sprzedaż apteczna jako obiekty z zachowaniem: `RefundLevel` wie, jak wycenić opakowanie, `Medication` pilnuje i zdejmuje własny stan, `Prescription::dispense()` sprawdza ważność i wcześniejszą realizację i tworzy `Sale`, a `Sale::overTheCounter()` używa tego samego `Medication::dispense()`. Każda reguła jest w dokładnie jednym miejscu; duplikacja z Transaction Script zniknęła. Wczytywania i zapisu tych obiektów celowo nie ma, to zadanie wzorców źródła danych.
 
 Stosuj, gdy reguł biznesowych jest dużo, są powiązane i często się zmieniają, a koszt zaprojektowania obiektów zwraca się przy każdej nowej funkcji. Dla cienkiej aplikacji CRUD z garstką reguł jest cięższy niż Transaction Script.
+
+#### Service Layer – `src/Enterprise/DomainLogic/ServiceLayer`
+`PharmacyService` to granica aplikacji nad Domain Model: jedna metoda na przypadek użycia (`dispensePrescription()`, `sellOverTheCounter()`), z których każda otwiera transakcję, wczytuje obiekty przez interfejsy repozytoriów, woła jedną metodę domenową, zapisuje to, co się zmieniło, i zwraca prosty wynik dla warstwy prezentacji. Sam nie zawiera reguł biznesowych, tylko koordynację.
+
+Stosuj, gdy kilku klientów (web, API, CLI, konsument kolejki) potrzebuje tych samych przypadków użycia, albo gdy przypadek użycia musi skoordynować transakcję, zapis i powiadomienia wokół logiki domenowej. Pomiń, gdy klient jest jeden i Domain Model można wołać wprost z kontrolera.

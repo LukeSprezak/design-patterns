@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Creational\Builder;
 
+use DesignPatterns\Creational\Builder\Medication\Medication;
 use DomainException;
 
 final class InvalidPrescriptionException extends DomainException
