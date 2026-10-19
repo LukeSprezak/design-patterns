@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Tests\Enterprise\DomainLogic\TableModule;
 
+use DesignPatterns\Enterprise\DomainLogic\TableModule\CrewType;
 use DesignPatterns\Enterprise\DomainLogic\TableModule\Dispatches;
 use DesignPatterns\Enterprise\DomainLogic\TableModule\EmergencyDispatchSchema;
 use DesignPatterns\Enterprise\DomainLogic\TableModule\Tariffs;
@@ -56,6 +57,6 @@ final class DispatchesTest extends TestCase
         $settlement = $this->dispatches->settlementForMonth(2026, 9);
 
         // P: dispatch 2 (20000 + 8 * 350) + dispatch 5 (20000 + 3 * 350); dispatch 3 cancelled, dispatch 4 is October
-        self::assertSame(['P' => 22800 + 21050, 'S' => 30000 + 12 * 450], $settlement);
+        self::assertSame([CrewType::Basic->value => 22800 + 21050, CrewType::Specialist->value => 30000 + 12 * 450], $settlement);
     }
 }

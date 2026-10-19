@@ -24,7 +24,7 @@ final readonly class Dispatches
         return $this->priceOfRow($this->fetchRow($dispatchId));
     }
 
-    /** @return array<string, int> crew type => amount to invoice in cents, ordered by crew type */
+    /** @return array<string, int> crew type value => amount to invoice in cents, ordered by crew type */
     public function settlementForMonth(int $year, int $month): array
     {
         $statement = $this->connection->prepare(
@@ -45,13 +45,13 @@ final readonly class Dispatches
     /** @param array{crew_type: string, kilometers: int, outcome: string} $dispatch */
     private static function isBillableRow(array $dispatch): bool
     {
-        return $dispatch['outcome'] !== 'cancelled';
+        return DispatchOutcome::from($dispatch['outcome'])->isBillable();
     }
 
     /** @param array{crew_type: string, kilometers: int, outcome: string} $dispatch */
     private function priceOfRow(array $dispatch): int
     {
-        return $this->tariffs->priceInCents($dispatch['crew_type'], $dispatch['kilometers']);
+        return $this->tariffs->priceInCents(CrewType::from($dispatch['crew_type']), $dispatch['kilometers']);
     }
 
     /** @return array{crew_type: string, kilometers: int, outcome: string} */

@@ -8,17 +8,19 @@ use PDO;
 
 final readonly class Tariffs
 {
-    public function __construct(private PDO $connection)
+    /** @var array<string, array{base_fee_in_cents: int, fee_per_kilometer_in_cents: int}> crew type value => tariff row */
+    private array $rows;
+
+    public function __construct(PDO $connection)
     {
+        $this->rows = $connection
+            ->query('SELECT crew_type, base_fee_in_cents, fee_per_kilometer_in_cents FROM tariffs')
+            ->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     }
 
-    public function priceInCents(string $crewType, int $kilometers): int
+    public function priceInCents(CrewType $crewType, int $kilometers): int
     {
-        $statement = $this->connection->prepare(
-            'SELECT base_fee_in_cents, fee_per_kilometer_in_cents FROM tariffs WHERE crew_type = ?',
-        );
-        $statement->execute([$crewType]);
-        $tariff = $statement->fetch(PDO::FETCH_ASSOC);
+        $tariff = $this->rows[$crewType->value];
 
         return $tariff['base_fee_in_cents'] + $kilometers * $tariff['fee_per_kilometer_in_cents'];
     }

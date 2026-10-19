@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Tests\Enterprise\DomainLogic\TableModule;
 
+use DesignPatterns\Enterprise\DomainLogic\TableModule\CrewType;
 use DesignPatterns\Enterprise\DomainLogic\TableModule\EmergencyDispatchSchema;
 use DesignPatterns\Enterprise\DomainLogic\TableModule\Tariffs;
 use PDO;
@@ -32,7 +33,7 @@ final class TariffsTest extends TestCase
     #[Test]
     public function priceIsBaseFeeOfCrewTypePlusFeePerKilometer(): void
     {
-        self::assertSame(30000 + 12 * 450, $this->tariffs->priceInCents('S', 12));
-        self::assertSame(20000 + 8 * 350, $this->tariffs->priceInCents('P', 8));
+        self::assertSame(30000 + 12 * 450, $this->tariffs->priceInCents(CrewType::Specialist, 12));
+        self::assertSame(20000 + 8 * 350, $this->tariffs->priceInCents(CrewType::Basic, 8));
     }
 }
