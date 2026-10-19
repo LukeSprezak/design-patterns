@@ -8,17 +8,17 @@ use DateTimeImmutable;
 use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\Prescription;
 use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\PrescriptionItem;
 use DesignPatterns\Enterprise\DomainLogic\DomainModel\Prescription\RefundLevel;
+use DesignPatterns\Enterprise\DomainLogic\ServiceLayer\MedicationRepository;
 use DesignPatterns\Enterprise\DomainLogic\ServiceLayer\PrescriptionRepository;
 use PDO;
 
 /** Assembles the Prescription aggregate (header, items, their medications) from three tables and writes its changes back. */
 final readonly class PrescriptionMapper implements PrescriptionRepository
 {
-    private MedicationMapper $medications;
-
-    public function __construct(private PDO $connection)
-    {
-        $this->medications = new MedicationMapper($connection);
+    public function __construct(
+        private PDO $connection,
+        private MedicationRepository $medications,
+    ) {
     }
 
     #[\Override]

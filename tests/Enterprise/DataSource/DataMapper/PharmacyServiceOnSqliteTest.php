@@ -27,7 +27,7 @@ final class PharmacyServiceOnSqliteTest extends TestCase
     {
         $this->connection = PharmacyFixture::connection();
         $this->pharmacyService = new PharmacyService(
-            new PrescriptionMapper($this->connection),
+            new PrescriptionMapper($this->connection, new MedicationMapper($this->connection)),
             new MedicationMapper($this->connection),
             new SaleMapper($this->connection),
             new PdoTransactionManager($this->connection),

@@ -91,6 +91,13 @@ Use it when the domain is simple and objects map one-to-one onto tables, which i
 
 Use it with a Domain Model whose objects do not map one-to-one onto tables, or when the domain must be testable without a database. For simple CRUD on flat tables it is more code than an Active Record for no benefit; Doctrine ORM is a general-purpose Data Mapper, so in PHP you usually configure one rather than write one.
 
+### Object-Relational
+
+#### Identity Map – `src/Enterprise/ObjectRelational/IdentityMap`
+A prescription lists the same insulin twice (morning and evening dose, different refund levels). Without a map, the Data Mapper loads two `Medication` objects for one row, each reduces its own copy of the stock and the second `save()` overwrites the first: a lost update inside a single transaction. `IdentityMap` keeps one object per class and id, and the mapper's `get()` asks the map before the database, so both items share one object and the stock ends up correct. The test shows both outcomes side by side.
+
+Use it whenever a Domain Model is loaded through mappers and the same row can be reached twice within one unit of work; it also removes repeated SELECTs. Scope it to one transaction or request, because a longer-lived map serves stale objects. Doctrine's `EntityManager` has one built in.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -177,3 +184,10 @@ Stosuj, gdy domena jest prosta, a obiekty mapują się jeden do jednego na tabel
 `MedicationMapper`, `PrescriptionMapper` i `SaleMapper` implementują interfejsy repozytoriów z Service Layer na `PharmacySchema`: mapper czyta wiersze i składa z nich obiekty Domain Model (`Prescription` z pozycjami i ich lekami), a zmienione obiekty rozkłada z powrotem na UPDATE i INSERT. Klasy domenowe nie znają PDO, a `PdoTransactionManager` domyka historię: `PharmacyService` działa teraz od końca do końca na SQLite, z tymi samymi testami, które wcześniej chodziły na fake'ach in-memory.
 
 Stosuj z Domain Model, którego obiekty nie mapują się jeden do jednego na tabele, albo gdy domena ma być testowalna bez bazy. Przy prostym CRUD na płaskich tabelach to więcej kodu niż Active Record bez zysku; Doctrine ORM to ogólny Data Mapper, więc w PHP zwykle go konfigurujesz, a nie piszesz.
+
+### Obiektowo-relacyjne
+
+#### Identity Map – `src/Enterprise/ObjectRelational/IdentityMap`
+Recepta ma tę samą insulinę na dwóch pozycjach (dawka poranna i wieczorna, różne poziomy refundacji). Bez mapy Data Mapper wczytuje dwa obiekty `Medication` dla jednego wiersza, każdy zdejmuje stan ze swojej kopii, a drugi `save()` nadpisuje pierwszy: lost update wewnątrz jednej transakcji. `IdentityMap` trzyma jeden obiekt na klasę i id, a `get()` mappera pyta najpierw mapę, potem bazę, więc obie pozycje dzielą jeden obiekt i stan wychodzi poprawny. Test pokazuje oba wyniki obok siebie.
+
+Stosuj zawsze, gdy Domain Model jest wczytywany przez mappery i ten sam wiersz może być sięgnięty dwa razy w jednej jednostce pracy; przy okazji znikają powtórne SELECT-y. Ogranicz jej życie do jednej transakcji lub żądania, bo dłużej żyjąca mapa serwuje przestarzałe obiekty. `EntityManager` Doctrine ma ją wbudowaną.

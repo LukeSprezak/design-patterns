@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DesignPatterns\Tests\Enterprise\DataSource\DataMapper;
 
 use DateTimeImmutable;
+use DesignPatterns\Enterprise\DataSource\DataMapper\MedicationMapper;
 use DesignPatterns\Enterprise\DataSource\DataMapper\PrescriptionMapper;
 use DesignPatterns\Enterprise\DataSource\DataMapper\RecordNotFoundException;
 use PDO;
@@ -21,7 +22,7 @@ final class PrescriptionMapperTest extends TestCase
     protected function setUp(): void
     {
         $this->connection = PharmacyFixture::connection();
-        $this->prescriptions = new PrescriptionMapper($this->connection);
+        $this->prescriptions = new PrescriptionMapper($this->connection, new MedicationMapper($this->connection));
     }
 
     #[Test]
