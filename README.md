@@ -81,6 +81,16 @@ One object per row of `medications`: `MedicationRow` carries the columns as publ
 
 Use it when Transaction Scripts prefer typed objects over arrays and each row maps to one record. The moment you want to add rules to the row object (`dispense()`), you have an Active Record; with a Domain Model you need a Data Mapper instead.
 
+#### Active Record – `src/Enterprise/DataSource/ActiveRecord`
+`Medication` is a row of `medications` that also carries its rules: `dispense()` checks and reduces stock and returns the amount to pay, `restock()` adds units, while `find()` and `save()` (an upsert) talk to PDO from inside the same class. One class, no mapping layer, but the domain object cannot exist without a database connection.
+
+Use it when the domain is simple and objects map one-to-one onto tables, which is why Laravel's Eloquent and Rails are built on it. As rules grow and objects stop matching rows, the mix of SQL and logic makes tests slow and refactoring hard; that is when a Domain Model with a Data Mapper pays off.
+
+#### Data Mapper – `src/Enterprise/DataSource/DataMapper`
+`MedicationMapper`, `PrescriptionMapper` and `SaleMapper` implement the Service Layer's repository interfaces on `PharmacySchema`: a mapper reads rows and assembles Domain Model objects (`Prescription` with its items and their medications), then takes changed objects apart into UPDATE and INSERT statements. The domain classes stay free of PDO, and `PdoTransactionManager` closes the story: `PharmacyService` now runs end to end on SQLite, with the same tests that previously ran on in-memory fakes.
+
+Use it with a Domain Model whose objects do not map one-to-one onto tables, or when the domain must be testable without a database. For simple CRUD on flat tables it is more code than an Active Record for no benefit; Doctrine ORM is a general-purpose Data Mapper, so in PHP you usually configure one rather than write one.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -157,3 +167,13 @@ Stosuj, gdy logika siedzi w Transaction Scriptach lub Table Modules i chcesz mie
 Jeden obiekt na wiersz tabeli `medications`: `MedicationRow` ma kolumny jako publiczne pola i umie sam zrobić `insert()`, `update()` i `delete()`, a `MedicationFinder` wykonuje SELECT-y i buduje obiekty wierszy. Nadal bez logiki biznesowej: obiekt wiersza to typowany uchwyt na rekord bazy, nic więcej.
 
 Stosuj, gdy Transaction Scripty wolą typowane obiekty od tablic, a każdy wiersz odpowiada jednemu rekordowi. W chwili, gdy chcesz dodać do obiektu wiersza reguły (`dispense()`), masz Active Record; przy Domain Model potrzebujesz Data Mappera.
+
+#### Active Record – `src/Enterprise/DataSource/ActiveRecord`
+`Medication` to wiersz tabeli `medications`, który niesie też swoje reguły: `dispense()` sprawdza i zdejmuje stan oraz zwraca kwotę do zapłaty, `restock()` dokłada opakowania, a `find()` i `save()` (upsert) rozmawiają z PDO z wnętrza tej samej klasy. Jedna klasa, zero warstwy mapowania, ale obiekt domenowy nie istnieje bez połączenia z bazą.
+
+Stosuj, gdy domena jest prosta, a obiekty mapują się jeden do jednego na tabele; dlatego na tym wzorcu stoją Eloquent z Laravela i Rails. Gdy reguł przybywa i obiekty przestają odpowiadać wierszom, mieszanka SQL i logiki spowalnia testy i utrudnia refaktor; wtedy opłaca się Domain Model z Data Mapperem.
+
+#### Data Mapper – `src/Enterprise/DataSource/DataMapper`
+`MedicationMapper`, `PrescriptionMapper` i `SaleMapper` implementują interfejsy repozytoriów z Service Layer na `PharmacySchema`: mapper czyta wiersze i składa z nich obiekty Domain Model (`Prescription` z pozycjami i ich lekami), a zmienione obiekty rozkłada z powrotem na UPDATE i INSERT. Klasy domenowe nie znają PDO, a `PdoTransactionManager` domyka historię: `PharmacyService` działa teraz od końca do końca na SQLite, z tymi samymi testami, które wcześniej chodziły na fake'ach in-memory.
+
+Stosuj z Domain Model, którego obiekty nie mapują się jeden do jednego na tabele, albo gdy domena ma być testowalna bez bazy. Przy prostym CRUD na płaskich tabelach to więcej kodu niż Active Record bez zysku; Doctrine ORM to ogólny Data Mapper, więc w PHP zwykle go konfigurujesz, a nie piszesz.
