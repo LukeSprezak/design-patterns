@@ -57,6 +57,18 @@ Monthly settlement of ambulance dispatches: one class per database table (`Tarif
 
 Use it when logic is mostly tabular (rates, sums, filtering) and the platform provides a Record Set the UI and logic can share, as `DataSet` does in .NET. In PHP that infrastructure is missing, so a Domain Model or a Transaction Script almost always fits better; this one is here for completeness and comparison.
 
+### Web Presentation
+
+#### Front Controller – `src/Enterprise/WebPresentation/FrontController`
+Fire station dispatcher panel without a framework: every request enters through `FrontController::handle()`, which checks the dispatcher token, matches the request against a route table (`GET /incidents`, `POST /incidents/{id}/{action}`), hands it to one `Command` and logs the outcome. Commands contain only their own job; authentication, routing, logging and 404 live in one place.
+
+Use it when every request needs the same cross-cutting steps and you would otherwise copy them into each page script. In practice every framework ships one (Symfony `Kernel`, Laravel's `index.php`), so you write your own only in framework-free code or to understand what the framework does.
+
+#### Application Controller – `src/Enterprise/WebPresentation/ApplicationController`
+The incident lifecycle (`reported → dispatched → on_scene → closed`) as a state machine: `IncidentFlowController::handle()` takes the incident's state and the requested action, runs the matching domain command and returns the next view, for example `incident/request-backup` after arriving with too few units. Illegal transitions throw, and the Front Controller's `IncidentFlowCommand` turns that into a 409.
+
+Use it when the order of screens depends on application state (wizards, case workflows) and that logic would otherwise spread across page controllers as `if` chains. When pages are independent and there is no "what next", plain page controllers are enough.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -109,3 +121,15 @@ Stosuj, gdy kilku klientów (web, API, CLI, konsument kolejki) potrzebuje tych s
 Miesięczne rozliczenie wyjazdów pogotowia: jedna klasa na tabelę w bazie (`Tariffs`, `Dispatches`), jedna instancja na klasę, metody biorące id wiersza (`isBillable()`, `priceInCents()`) albo działające na całej tabeli (`settlementForMonth()`), a dane przez cały czas pozostają wierszami. Logika jest zorganizowana po tabelach, a nie po żądaniach (Transaction Script) ani po obiektach (Domain Model).
 
 Stosuj, gdy logika jest głównie „tabelowa” (stawki, sumy, filtrowanie), a platforma daje Record Set współdzielony przez UI i logikę, jak `DataSet` w .NET. W PHP tej infrastruktury nie ma, więc Domain Model albo Transaction Script prawie zawsze pasują lepiej; ten wzorzec jest tu dla kompletu i porównania.
+
+### Prezentacja webowa
+
+#### Front Controller – `src/Enterprise/WebPresentation/FrontController`
+Panel dyspozytora straży pożarnej bez frameworka: każde żądanie wchodzi przez `FrontController::handle()`, który sprawdza token dyspozytora, dopasowuje żądanie do tablicy tras (`GET /incidents`, `POST /incidents/{id}/{action}`), przekazuje je jednej komendzie `Command` i loguje wynik. Komendy zawierają tylko swoją robotę; uwierzytelnianie, routing, logowanie i 404 są w jednym miejscu.
+
+Stosuj, gdy każde żądanie wymaga tych samych wspólnych kroków, które inaczej kopiowałbyś do każdego skryptu strony. W praktyce dostarcza go każdy framework (Symfony `Kernel`, `index.php` Laravela), więc własny piszesz tylko w kodzie bez frameworka albo po to, żeby zrozumieć, co framework robi.
+
+#### Application Controller – `src/Enterprise/WebPresentation/ApplicationController`
+Cykl życia zdarzenia (`reported → dispatched → on_scene → closed`) jako maszyna stanów: `IncidentFlowController::handle()` bierze stan zdarzenia i żądaną akcję, uruchamia pasującą komendę domenową i zwraca następny widok, np. `incident/request-backup` po dojeździe ze zbyt małą liczbą zastępów. Niedozwolone przejścia rzucają wyjątek, a `IncidentFlowCommand` z Front Controllera zamienia go na 409.
+
+Stosuj, gdy kolejność ekranów zależy od stanu aplikacji (kreatory, obieg spraw), a ta logika rozlałaby się po kontrolerach stron w postaci łańcuchów `if`. Gdy strony są niezależne i nie ma pytania „co dalej”, wystarczą zwykłe kontrolery stron.
