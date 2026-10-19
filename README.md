@@ -76,6 +76,11 @@ Use it when the order of screens depends on application state (wizards, case wor
 
 Use it when logic lives in Transaction Scripts or Table Modules and you want SQL in one place per table. With a Domain Model you need a Data Mapper instead, because the gateway returns rows, not objects.
 
+#### Row Data Gateway – `src/Enterprise/DataSource/RowDataGateway`
+One object per row of `medications`: `MedicationRow` carries the columns as public fields and knows how to `insert()`, `update()` and `delete()` itself, while `MedicationFinder` runs the SELECTs and builds row objects. Still no business logic: the row object is a typed handle on a database record, nothing more.
+
+Use it when Transaction Scripts prefer typed objects over arrays and each row maps to one record. The moment you want to add rules to the row object (`dispense()`), you have an Active Record; with a Domain Model you need a Data Mapper instead.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -147,3 +152,8 @@ Stosuj, gdy kolejność ekranów zależy od stanu aplikacji (kreatory, obieg spr
 `MedicationGateway` to jedyny obiekt, który zna SQL tabeli `medications`: jedna instancja na tabelę, jedna metoda na zapytanie (`find()`, `findBelowStock()`, `insert()`, `updateStock()`, `delete()`), wiersze wchodzą i wychodzą jako zwykłe tablice. Nie ma logiki biznesowej, więc Transaction Script albo Table Module może go wołać zamiast wpisywać SQL u siebie.
 
 Stosuj, gdy logika siedzi w Transaction Scriptach lub Table Modules i chcesz mieć SQL w jednym miejscu na tabelę. Przy Domain Model potrzebujesz Data Mappera, bo brama zwraca wiersze, a nie obiekty.
+
+#### Row Data Gateway – `src/Enterprise/DataSource/RowDataGateway`
+Jeden obiekt na wiersz tabeli `medications`: `MedicationRow` ma kolumny jako publiczne pola i umie sam zrobić `insert()`, `update()` i `delete()`, a `MedicationFinder` wykonuje SELECT-y i buduje obiekty wierszy. Nadal bez logiki biznesowej: obiekt wiersza to typowany uchwyt na rekord bazy, nic więcej.
+
+Stosuj, gdy Transaction Scripty wolą typowane obiekty od tablic, a każdy wiersz odpowiada jednemu rekordowi. W chwili, gdy chcesz dodać do obiektu wiersza reguły (`dispense()`), masz Active Record; przy Domain Model potrzebujesz Data Mappera.
