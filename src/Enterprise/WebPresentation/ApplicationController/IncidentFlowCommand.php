@@ -25,6 +25,9 @@ final readonly class IncidentFlowCommand implements Command
         if ($incident === null || $action === null) {
             return Response::json(404, ['error' => 'unknown incident or action']);
         }
+        if ($action->requiresUnits() && !is_int($request->body['units'] ?? null)) {
+            return Response::json(422, ['error' => "action {$action->value} requires an integer number of units"]);
+        }
 
         try {
             $view = $this->flowController->handle($incident, $action, $request->body);

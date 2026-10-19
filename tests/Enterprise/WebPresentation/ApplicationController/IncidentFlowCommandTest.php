@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Tests\Enterprise\WebPresentation\ApplicationController;
 
+use DesignPatterns\Enterprise\WebPresentation\ApplicationController\IncidentAction;
 use DesignPatterns\Enterprise\WebPresentation\ApplicationController\IncidentFlowCommand;
 use DesignPatterns\Enterprise\WebPresentation\ApplicationController\IncidentFlowController;
 use DesignPatterns\Enterprise\WebPresentation\Http\Request;
@@ -13,6 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(IncidentFlowCommand::class)]
+#[CoversClass(IncidentAction::class)]
 #[CoversClass(IncidentRegister::class)]
 final class IncidentFlowCommandTest extends TestCase
 {
@@ -30,6 +32,13 @@ final class IncidentFlowCommandTest extends TestCase
     {
         self::assertSame(404, $this->command->execute($this->request(id: '99', action: 'dispatch'))->statusCode);
         self::assertSame(404, $this->command->execute($this->request(id: '1', action: 'evacuate'))->statusCode);
+    }
+
+    #[Test]
+    public function rejectsActionThatNeedsUnitsWhenUnitsAreMissingOrNotInteger(): void
+    {
+        self::assertSame(422, $this->command->execute($this->request(id: '1', action: 'dispatch'))->statusCode);
+        self::assertSame(422, $this->command->execute($this->request(id: '1', action: 'request_backup', body: ['units' => 'two']))->statusCode);
     }
 
     #[Test]

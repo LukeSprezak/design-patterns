@@ -69,6 +69,13 @@ The incident lifecycle (`reported → dispatched → on_scene → closed`) as a 
 
 Use it when the order of screens depends on application state (wizards, case workflows) and that logic would otherwise spread across page controllers as `if` chains. When pages are independent and there is no "what next", plain page controllers are enough.
 
+### Data Source
+
+#### Table Data Gateway – `src/Enterprise/DataSource/TableDataGateway`
+`MedicationGateway` is the only object that knows the SQL of the `medications` table: one instance per table, one method per statement (`find()`, `findBelowStock()`, `insert()`, `updateStock()`, `delete()`), rows passed in and out as plain arrays. It holds no business logic, so a Transaction Script or a Table Module can call it instead of embedding SQL.
+
+Use it when logic lives in Transaction Scripts or Table Modules and you want SQL in one place per table. With a Domain Model you need a Data Mapper instead, because the gateway returns rows, not objects.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -133,3 +140,10 @@ Stosuj, gdy każde żądanie wymaga tych samych wspólnych kroków, które inacz
 Cykl życia zdarzenia (`reported → dispatched → on_scene → closed`) jako maszyna stanów: `IncidentFlowController::handle()` bierze stan zdarzenia i żądaną akcję, uruchamia pasującą komendę domenową i zwraca następny widok, np. `incident/request-backup` po dojeździe ze zbyt małą liczbą zastępów. Niedozwolone przejścia rzucają wyjątek, a `IncidentFlowCommand` z Front Controllera zamienia go na 409.
 
 Stosuj, gdy kolejność ekranów zależy od stanu aplikacji (kreatory, obieg spraw), a ta logika rozlałaby się po kontrolerach stron w postaci łańcuchów `if`. Gdy strony są niezależne i nie ma pytania „co dalej”, wystarczą zwykłe kontrolery stron.
+
+### Źródło danych
+
+#### Table Data Gateway – `src/Enterprise/DataSource/TableDataGateway`
+`MedicationGateway` to jedyny obiekt, który zna SQL tabeli `medications`: jedna instancja na tabelę, jedna metoda na zapytanie (`find()`, `findBelowStock()`, `insert()`, `updateStock()`, `delete()`), wiersze wchodzą i wychodzą jako zwykłe tablice. Nie ma logiki biznesowej, więc Transaction Script albo Table Module może go wołać zamiast wpisywać SQL u siebie.
+
+Stosuj, gdy logika siedzi w Transaction Scriptach lub Table Modules i chcesz mieć SQL w jednym miejscu na tabelę. Przy Domain Model potrzebujesz Data Mappera, bo brama zwraca wiersze, a nie obiekty.

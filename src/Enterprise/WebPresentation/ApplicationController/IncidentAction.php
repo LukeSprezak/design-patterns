@@ -10,4 +10,9 @@ enum IncidentAction: string
     case Arrive = 'arrive';
     case RequestBackup = 'request_backup';
     case Close = 'close';
+
+    public function requiresUnits(): bool
+    {
+        return $this === self::Dispatch || $this === self::RequestBackup;
+    }
 }
