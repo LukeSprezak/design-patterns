@@ -98,6 +98,11 @@ A prescription lists the same insulin twice (morning and evening dose, different
 
 Use it whenever a Domain Model is loaded through mappers and the same row can be reached twice within one unit of work; it also removes repeated SELECTs. Scope it to one transaction or request, because a longer-lived map serves stale objects. Doctrine's `EntityManager` has one built in.
 
+#### Unit of Work – `src/Enterprise/ObjectRelational/UnitOfWork`
+`UnitOfWork` collects what one business transaction touched (`registerDirty()` for loaded medications and prescriptions, `registerNew()` for the sale) and `commit()` writes each object exactly once through its mapper, inside one database transaction, then clears itself. The `PharmacyService` here is the Service Layer's one rewritten on top of it: no `transactional()` closure, no save-per-line loop, just register and commit. Paired with the Identity Map, the same medication registered from two prescription items is written once.
+
+Use it when a use case changes several objects and you want persistence decided in one place, with duplicates removed and the transaction boundary owned by the unit, not by each service method. For a single-object change it is ceremony; Doctrine's `EntityManager::flush()` is this pattern with automatic dirty checking, so in PHP you usually use that rather than write one.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -191,3 +196,8 @@ Stosuj z Domain Model, którego obiekty nie mapują się jeden do jednego na tab
 Recepta ma tę samą insulinę na dwóch pozycjach (dawka poranna i wieczorna, różne poziomy refundacji). Bez mapy Data Mapper wczytuje dwa obiekty `Medication` dla jednego wiersza, każdy zdejmuje stan ze swojej kopii, a drugi `save()` nadpisuje pierwszy: lost update wewnątrz jednej transakcji. `IdentityMap` trzyma jeden obiekt na klasę i id, a `get()` mappera pyta najpierw mapę, potem bazę, więc obie pozycje dzielą jeden obiekt i stan wychodzi poprawny. Test pokazuje oba wyniki obok siebie.
 
 Stosuj zawsze, gdy Domain Model jest wczytywany przez mappery i ten sam wiersz może być sięgnięty dwa razy w jednej jednostce pracy; przy okazji znikają powtórne SELECT-y. Ogranicz jej życie do jednej transakcji lub żądania, bo dłużej żyjąca mapa serwuje przestarzałe obiekty. `EntityManager` Doctrine ma ją wbudowaną.
+
+#### Unit of Work – `src/Enterprise/ObjectRelational/UnitOfWork`
+`UnitOfWork` zbiera to, czego dotknęła jedna transakcja biznesowa (`registerDirty()` dla wczytanych leków i recept, `registerNew()` dla sprzedaży), a `commit()` zapisuje każdy obiekt dokładnie raz przez jego mapper, w jednej transakcji bazodanowej, po czym się czyści. Tutejszy `PharmacyService` to serwis z Service Layer przepisany na tę jednostkę: bez closure `transactional()`, bez pętli zapisu per linia, tylko rejestracja i commit. W parze z Identity Map ten sam lek zarejestrowany z dwóch pozycji recepty zapisuje się raz.
+
+Stosuj, gdy przypadek użycia zmienia kilka obiektów i chcesz, żeby o zapisie decydowało jedno miejsce, z usuniętymi duplikatami i granicą transakcji należącą do jednostki, a nie do każdej metody serwisu. Przy zmianie jednego obiektu to zbędna ceremonia; `EntityManager::flush()` Doctrine to ten wzorzec z automatycznym wykrywaniem zmian, więc w PHP zwykle używasz jego, a nie piszesz własnego.
