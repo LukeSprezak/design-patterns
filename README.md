@@ -113,6 +113,16 @@ A courier `Invoice` holds two value objects, `Address` and `Money`, that have no
 
 Use it for small immutable value objects that belong to exactly one owner, especially money, addresses and date ranges. When the value needs identity, is shared by several owners or is a collection, it belongs in its own table with a foreign key. In Doctrine this is `#[Embedded]`.
 
+#### Single Table Inheritance – `src/Enterprise/ObjectRelational/InheritanceMapping/SingleTable`
+A logistics hierarchy `Shipment` → `ParcelShipment` (weight) / `PalletShipment` (pallet count, EUR-pallet exchange) lives in one `shipments` table: a `type` discriminator column plus nullable columns for every subclass field. `SingleTableShipmentMapper` writes the subclass fields it has and `NULL` for the rest, and rebuilds the right subclass from `type` with one plain `SELECT` for both `find()` and `findBySender()`.
+
+Use it when subclasses add few fields and polymorphic queries dominate: one table, no joins, fastest reads. The cost is a wide table of nullable columns and the loss of `NOT NULL` constraints on subclass data; with many or heavy subclasses switch to Class Table Inheritance. In Doctrine this is `#[InheritanceType('SINGLE_TABLE')]`.
+
+#### Class Table Inheritance – `src/Enterprise/ObjectRelational/InheritanceMapping/ClassTable`
+The same hierarchy stored as one table per class: `shipments` (tracking number, type, sender) plus `parcel_shipments` and `pallet_shipments` sharing the tracking number as primary and foreign key. `ClassTableShipmentMapper::insert()` writes two rows, and every read `LEFT JOIN`s all subclass tables and picks the meaningful columns by `type`. The test suite runs the same behaviour tests through both mappers with a `#[DataProvider]`; only the table-layout tests differ.
+
+Use it when subclasses carry many fields that deserve `NOT NULL` constraints and their own indexes, or when the schema is shared with other applications that read one subclass table. The cost is a join per level on every read and a multi-row insert that needs a transaction. In Doctrine this is `#[InheritanceType('JOINED')]`.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -221,3 +231,13 @@ Stosuj, gdy lista albo obiekt nadrzędny są wczytywane dużo częściej niż ic
 Faktura kurierska `Invoice` zawiera dwa value objecty, `Address` i `Money`, które nie mają tożsamości ani własnej tabeli: `InvoiceMapper` rozpłaszcza je do kolumn wiersza `invoices` (`recipient_street`, `recipient_city`, `net_amount_in_cents`, `currency`) i odbudowuje obiekty przy wczytaniu. Domena ma `$invoice->recipient->city` i `$invoice->grossAmount`, a baza widzi jeden zwykły wiersz.
 
 Stosuj dla małych, niemutowalnych value objectów należących do dokładnie jednego właściciela, zwłaszcza pieniędzy, adresów i zakresów dat. Gdy wartość potrzebuje tożsamości, jest dzielona przez kilku właścicieli albo jest kolekcją, należy jej się własna tabela z kluczem obcym. W Doctrine to `#[Embedded]`.
+
+#### Single Table Inheritance – `src/Enterprise/ObjectRelational/InheritanceMapping/SingleTable`
+Hierarchia logistyczna `Shipment` → `ParcelShipment` (waga) / `PalletShipment` (liczba palet, wymiana EUR-palet) mieszka w jednej tabeli `shipments`: kolumna dyskryminatora `type` plus nullowalne kolumny dla pól każdej podklasy. `SingleTableShipmentMapper` zapisuje pola, które ma, i `NULL` w pozostałych, a odpowiednią podklasę odbudowuje z `type` jednym zwykłym `SELECT` zarówno w `find()`, jak i `findBySender()`.
+
+Stosuj, gdy podklasy dodają niewiele pól, a dominują zapytania polimorficzne: jedna tabela, bez złączeń, najszybsze odczyty. Kosztem jest szeroka tabela nullowalnych kolumn i utrata ograniczeń `NOT NULL` na danych podklas; przy wielu lub ciężkich podklasach przejdź na Class Table Inheritance. W Doctrine to `#[InheritanceType('SINGLE_TABLE')]`.
+
+#### Class Table Inheritance – `src/Enterprise/ObjectRelational/InheritanceMapping/ClassTable`
+Ta sama hierarchia zapisana jako jedna tabela na klasę: `shipments` (numer przesyłki, typ, nadawca) oraz `parcel_shipments` i `pallet_shipments` dzielące numer przesyłki jako klucz główny i obcy. `ClassTableShipmentMapper::insert()` zapisuje dwa wiersze, a każdy odczyt robi `LEFT JOIN` ze wszystkimi tabelami podklas i wybiera znaczące kolumny po `type`. Testy zachowania przechodzą przez oba mappery z `#[DataProvider]`; różnią się tylko testy układu tabel.
+
+Stosuj, gdy podklasy niosą wiele pól zasługujących na `NOT NULL` i własne indeksy, albo gdy schemat dzielą inne aplikacje czytające tabelę jednej podklasy. Kosztem jest złączenie na każdym poziomie przy każdym odczycie i wielowierszowy insert wymagający transakcji. W Doctrine to `#[InheritanceType('JOINED')]`.
