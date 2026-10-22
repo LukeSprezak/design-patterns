@@ -123,6 +123,11 @@ The same hierarchy stored as one table per class: `shipments` (tracking number, 
 
 Use it when subclasses carry many fields that deserve `NOT NULL` constraints and their own indexes, or when the schema is shared with other applications that read one subclass table. The cost is a join per level on every read and a multi-row insert that needs a transaction. In Doctrine this is `#[InheritanceType('JOINED')]`.
 
+#### Association Table Mapping – `src/Enterprise/ObjectRelational/AssociationTableMapping`
+A courier's `DeliveryRoute` carries many `Shipment`s and a shipment can move between routes after a failed delivery: a many-to-many with no object of its own. The `route_shipments` table holds only two foreign keys; `DeliveryRouteMapper::find()` loads the shipments through a `JOIN` over it, and `save()` diffs the in-memory shipments against the stored rows, deleting the unloaded and inserting the newly loaded ones.
+
+Use it for many-to-many links that carry no data of their own. The moment the link gets attributes (loaded at, scan position, who signed) it becomes an entity with its own class and mapper. In Doctrine this is `#[ManyToMany]` with `#[JoinTable]`.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -241,3 +246,8 @@ Stosuj, gdy podklasy dodają niewiele pól, a dominują zapytania polimorficzne:
 Ta sama hierarchia zapisana jako jedna tabela na klasę: `shipments` (numer przesyłki, typ, nadawca) oraz `parcel_shipments` i `pallet_shipments` dzielące numer przesyłki jako klucz główny i obcy. `ClassTableShipmentMapper::insert()` zapisuje dwa wiersze, a każdy odczyt robi `LEFT JOIN` ze wszystkimi tabelami podklas i wybiera znaczące kolumny po `type`. Testy zachowania przechodzą przez oba mappery z `#[DataProvider]`; różnią się tylko testy układu tabel.
 
 Stosuj, gdy podklasy niosą wiele pól zasługujących na `NOT NULL` i własne indeksy, albo gdy schemat dzielą inne aplikacje czytające tabelę jednej podklasy. Kosztem jest złączenie na każdym poziomie przy każdym odczycie i wielowierszowy insert wymagający transakcji. W Doctrine to `#[InheritanceType('JOINED')]`.
+
+#### Association Table Mapping – `src/Enterprise/ObjectRelational/AssociationTableMapping`
+Trasa kuriera `DeliveryRoute` wozi wiele `Shipment`, a przesyłka po nieudanym doręczeniu może przejść na inną trasę: wiele-do-wielu bez własnego obiektu. Tabela `route_shipments` ma tylko dwa klucze obce; `DeliveryRouteMapper::find()` ładuje przesyłki przez `JOIN` po niej, a `save()` porównuje przesyłki w pamięci z zapisanymi wierszami, usuwając wyładowane i wstawiając nowo załadowane.
+
+Stosuj dla powiązań wiele-do-wielu bez własnych danych. Gdy powiązanie dostaje atrybuty (kiedy załadowano, pozycja skanu, kto podpisał), staje się encją z własną klasą i mapperem. W Doctrine to `#[ManyToMany]` z `#[JoinTable]`.
