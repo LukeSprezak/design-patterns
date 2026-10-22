@@ -103,6 +103,11 @@ Use it whenever a Domain Model is loaded through mappers and the same row can be
 
 Use it when a use case changes several objects and you want persistence decided in one place, with duplicates removed and the transaction boundary owned by the unit, not by each service method. For a single-object change it is ceremony; Doctrine's `EntityManager::flush()` is this pattern with automatic dirty checking, so in PHP you usually use that rather than write one.
 
+#### Lazy Load – `src/Enterprise/ObjectRelational/LazyLoad`
+A dispenser's list of valid prescriptions needs only ids and validity dates, not items and medications. `PrescriptionFinder::findValidOn()` runs one query and returns native lazy proxies (PHP 8.4+ `ReflectionClass::newLazyProxy()`): `id` and `validUntil` are pre-filled from the list row, and the first touch of anything else (`dispense()`, `dispensedAt`) makes the Data Mapper load the full aggregate. The test counts prepared statements to prove when the database is hit, and the domain class is untouched.
+
+Use it when a list or a parent object is loaded far more often than its expensive parts. Watch for ripple loading (one query per element in a loop, the N+1 problem) and for proxies escaping the unit of work that could still load them; Doctrine proxies are this pattern.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -201,3 +206,8 @@ Stosuj zawsze, gdy Domain Model jest wczytywany przez mappery i ten sam wiersz m
 `UnitOfWork` zbiera to, czego dotknęła jedna transakcja biznesowa (`registerDirty()` dla wczytanych leków i recept, `registerNew()` dla sprzedaży), a `commit()` zapisuje każdy obiekt dokładnie raz przez jego mapper, w jednej transakcji bazodanowej, po czym się czyści. Tutejszy `PharmacyService` to serwis z Service Layer przepisany na tę jednostkę: bez closure `transactional()`, bez pętli zapisu per linia, tylko rejestracja i commit. W parze z Identity Map ten sam lek zarejestrowany z dwóch pozycji recepty zapisuje się raz.
 
 Stosuj, gdy przypadek użycia zmienia kilka obiektów i chcesz, żeby o zapisie decydowało jedno miejsce, z usuniętymi duplikatami i granicą transakcji należącą do jednostki, a nie do każdej metody serwisu. Przy zmianie jednego obiektu to zbędna ceremonia; `EntityManager::flush()` Doctrine to ten wzorzec z automatycznym wykrywaniem zmian, więc w PHP zwykle używasz jego, a nie piszesz własnego.
+
+#### Lazy Load – `src/Enterprise/ObjectRelational/LazyLoad`
+Lista ważnych recept u farmaceuty potrzebuje tylko id i dat ważności, nie pozycji i leków. `PrescriptionFinder::findValidOn()` wykonuje jedno zapytanie i zwraca natywne lazy proxy (PHP 8.4+ `ReflectionClass::newLazyProxy()`): `id` i `validUntil` są wypełnione z wiersza listy, a pierwsze dotknięcie czegokolwiek innego (`dispense()`, `dispensedAt`) każe Data Mapperowi wczytać cały agregat. Test liczy prepared statements, żeby udowodnić, kiedy baza jest odpytywana, a klasa domenowa pozostaje nietknięta.
+
+Stosuj, gdy lista albo obiekt nadrzędny są wczytywane dużo częściej niż ich kosztowne części. Uważaj na ładowanie kaskadowe (zapytanie per element w pętli, problem N+1) i na proxy wyciekające poza jednostkę pracy, która mogłaby je jeszcze doładować; proxy Doctrine to ten wzorzec.
