@@ -108,6 +108,11 @@ A dispenser's list of valid prescriptions needs only ids and validity dates, not
 
 Use it when a list or a parent object is loaded far more often than its expensive parts. Watch for ripple loading (one query per element in a loop, the N+1 problem) and for proxies escaping the unit of work that could still load them; Doctrine proxies are this pattern.
 
+#### Embedded Value – `src/Enterprise/ObjectRelational/EmbeddedValue`
+A courier `Invoice` holds two value objects, `Address` and `Money`, that have no identity and no table of their own: `InvoiceMapper` flattens them into columns of the `invoices` row (`recipient_street`, `recipient_city`, `net_amount_in_cents`, `currency`) and rebuilds the objects when loading. The domain keeps `$invoice->recipient->city` and `$invoice->grossAmount` while the database sees one plain row.
+
+Use it for small immutable value objects that belong to exactly one owner, especially money, addresses and date ranges. When the value needs identity, is shared by several owners or is a collection, it belongs in its own table with a foreign key. In Doctrine this is `#[Embedded]`.
+
 ## Kreacyjne
 
 ### Factory Method – `src/Creational/FactoryMethod`
@@ -211,3 +216,8 @@ Stosuj, gdy przypadek użycia zmienia kilka obiektów i chcesz, żeby o zapisie 
 Lista ważnych recept u farmaceuty potrzebuje tylko id i dat ważności, nie pozycji i leków. `PrescriptionFinder::findValidOn()` wykonuje jedno zapytanie i zwraca natywne lazy proxy (PHP 8.4+ `ReflectionClass::newLazyProxy()`): `id` i `validUntil` są wypełnione z wiersza listy, a pierwsze dotknięcie czegokolwiek innego (`dispense()`, `dispensedAt`) każe Data Mapperowi wczytać cały agregat. Test liczy prepared statements, żeby udowodnić, kiedy baza jest odpytywana, a klasa domenowa pozostaje nietknięta.
 
 Stosuj, gdy lista albo obiekt nadrzędny są wczytywane dużo częściej niż ich kosztowne części. Uważaj na ładowanie kaskadowe (zapytanie per element w pętli, problem N+1) i na proxy wyciekające poza jednostkę pracy, która mogłaby je jeszcze doładować; proxy Doctrine to ten wzorzec.
+
+#### Embedded Value – `src/Enterprise/ObjectRelational/EmbeddedValue`
+Faktura kurierska `Invoice` zawiera dwa value objecty, `Address` i `Money`, które nie mają tożsamości ani własnej tabeli: `InvoiceMapper` rozpłaszcza je do kolumn wiersza `invoices` (`recipient_street`, `recipient_city`, `net_amount_in_cents`, `currency`) i odbudowuje obiekty przy wczytaniu. Domena ma `$invoice->recipient->city` i `$invoice->grossAmount`, a baza widzi jeden zwykły wiersz.
+
+Stosuj dla małych, niemutowalnych value objectów należących do dokładnie jednego właściciela, zwłaszcza pieniędzy, adresów i zakresów dat. Gdy wartość potrzebuje tożsamości, jest dzielona przez kilku właścicieli albo jest kolekcją, należy jej się własna tabela z kluczem obcym. W Doctrine to `#[Embedded]`.
