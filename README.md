@@ -43,6 +43,11 @@ Warehouse shipping labels on thermal printers: the label kind (standard, return 
 
 Use it when two dimensions vary independently and the implementation side can offer low-level primitives the abstraction composes into higher-level operations. If only one dimension varies, an interface injected through the constructor is enough; if you are fitting an existing incompatible API, that is an Adapter; and if every combination needs its own layout, the split is artificial.
 
+### Composite – `src/Structural/Composite`
+Ordering medical lab tests: a patient picks single tests and packages, and packages nest (a cardiology package holds a lipid panel, which holds four tests). `SingleLabTest` and `LabTestPackage` share the `LabTest` interface, so callers never check which one they have, while each operation aggregates by its own rule: price sums the children and applies every level's discount, turnaround time is the slowest child, and sample types are a union so one tube serves every test that needs it. Children go into the package's constructor, keeping `add()`/`remove()` off the shared interface.
+
+Use it when data forms a tree of arbitrary depth and clients should treat a single element and a group the same way through operations that recurse. A flat list needs only an array; if leaves and groups share few operations, a common interface forces empty implementations; and a tree that is only displayed is simpler as a recursive function over plain data.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -178,6 +183,11 @@ Stosuj, gdy musisz podłączyć kod, którego nie możesz zmienić (SDK, moduł 
 Etykiety wysyłkowe w magazynie na drukarkach termicznych: rodzaj etykiety (standardowa, zwrotna z zamienionymi adresami i banerem, z towarem niebezpiecznym i numerem UN w ramce) i język drukarki (ZPL dla nowszych Zebr, EPL dla starszych) zmieniają się niezależnie. Podklasy `ShippingLabel` decydują, co i gdzie jest na etykiecie, i budują ją z prymitywów (`text()`, `barcode()`, `box()`) dostarczanych przez `LabelPrinterLanguage`, więc 3 rodzaje × 2 języki to 3 + 2 klasy zamiast 6, a nowa etykieta lub drukarka to jedna klasa.
 
 Stosuj, gdy dwa wymiary zmieniają się niezależnie, a strona implementacji może dać prymitywy niskiego poziomu, z których abstrakcja składa operacje wyższego poziomu. Gdy zmienia się tylko jeden wymiar, wystarczy interfejs wstrzyknięty przez konstruktor; gdy dopasowujesz istniejące niezgodne API, to Adapter; gdy każda kombinacja wymaga własnego układu, rozdział jest sztuczny.
+
+### Composite – `src/Structural/Composite`
+Zamawianie badań laboratoryjnych: pacjent wybiera badania pojedyncze i pakiety, a pakiety się zagnieżdżają (pakiet kardiologiczny zawiera lipidogram, który zawiera cztery badania). `SingleLabTest` i `LabTestPackage` dzielą interfejs `LabTest`, więc wywołujący nigdy nie sprawdza, co ma w ręku, a każda operacja agreguje według własnej reguły: cena sumuje dzieci i nakłada rabat każdego poziomu, czas oczekiwania to najwolniejsze dziecko, a typy próbek to suma zbiorów, więc jedna probówka obsługuje wszystkie badania, które jej potrzebują. Dzieci trafiają do konstruktora pakietu, dzięki czemu `add()`/`remove()` nie ma we wspólnym interfejsie.
+
+Stosuj, gdy dane tworzą drzewo dowolnej głębokości, a klient ma traktować pojedynczy element i grupę jednakowo przez operacje, które schodzą rekurencyjnie. Płaska lista potrzebuje tylko tablicy; gdy liście i grupy mają mało wspólnych operacji, wspólny interfejs wymusza puste implementacje; drzewo tylko do wyświetlenia jest prostsze jako rekurencyjna funkcja po zwykłych danych.
 
 ## Korporacyjne (PoEAA)
 
