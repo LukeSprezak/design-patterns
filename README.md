@@ -31,6 +31,13 @@ Fiscal printer connection in a pharmacy: the printer sits on one serial port and
 
 Use it only when "exactly one per process" is a hardware or protocol constraint that must hold regardless of configuration. In every other case register a plain class as a shared service in the DI container: it gives one instance too, but stays testable, replaceable and free of global state.
 
+## Structural
+
+### Adapter – `src/Structural/Adapter`
+Card payments in an online shop: checkout depends on its own `PaymentGateway` (amounts as `int` cents, a `PaymentStatus` enum, `RefundRejectedException`), while the PayU and Stripe SDKs each speak their own language: arrays with string amounts and status codes on one side, objects, lowercase statuses and vendor exceptions on the other. `PayUPaymentGateway` and `StripePaymentGateway` translate units, statuses and errors, so no vendor type leaks past them; the same tests run against both.
+
+Use it when you must plug code you cannot change (an SDK, a legacy module) into an interface your application already defines. If you own both sides, change the interface instead; if the third-party API already fits, an adapter that only forwards calls is a needless layer; to simplify a large API rather than match an existing contract, reach for a Facade.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -154,6 +161,13 @@ Stosuj, gdy nowy obiekt jest w większości kopią istniejącego, skonfigurowane
 Połączenie z drukarką fiskalną w aptece: drukarka wisi na jednym porcie szeregowym i prowadzi ciągłą numerację paragonów, więc drugie połączenie w tym samym procesie by ją zepsuło. Klasa sama wymusza jedną instancję przez `getInstance()`, prywatny konstruktor, prywatne `__clone()` i `__unserialize()` rzucające wyjątek.
 
 Stosuj tylko wtedy, gdy „dokładnie jedna na proces” wynika ze sprzętu lub protokołu i musi obowiązywać niezależnie od konfiguracji. W każdym innym przypadku zarejestruj zwykłą klasę jako shared service w kontenerze DI: też daje jedną instancję, ale pozostaje testowalna, podmienialna i wolna od globalnego stanu.
+
+## Strukturalne
+
+### Adapter – `src/Structural/Adapter`
+Płatności kartą w sklepie internetowym: checkout zależy od własnego `PaymentGateway` (kwoty jako `int` w groszach, enum `PaymentStatus`, `RefundRejectedException`), a SDK PayU i Stripe mówią każde swoim językiem: z jednej strony tablice z kwotami jako stringi i kody statusów, z drugiej obiekty, statusy małymi literami i wyjątki vendora. `PayUPaymentGateway` i `StripePaymentGateway` tłumaczą jednostki, statusy i błędy, więc żaden typ dostawcy nie przecieka dalej; te same testy przechodzą przez oba adaptery.
+
+Stosuj, gdy musisz podłączyć kod, którego nie możesz zmienić (SDK, moduł legacy), pod interfejs, który twoja aplikacja już definiuje. Jeśli obie strony są twoje, zmień interfejs zamiast go owijać; jeśli zewnętrzne API już pasuje, adapter przekazujący tylko wywołania jest zbędną warstwą; gdy chcesz uprościć duże API, a nie dopasować je do istniejącego kontraktu, sięgnij po Facade.
 
 ## Korporacyjne (PoEAA)
 
