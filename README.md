@@ -38,6 +38,11 @@ Card payments in an online shop: checkout depends on its own `PaymentGateway` (a
 
 Use it when you must plug code you cannot change (an SDK, a legacy module) into an interface your application already defines. If you own both sides, change the interface instead; if the third-party API already fits, an adapter that only forwards calls is a needless layer; to simplify a large API rather than match an existing contract, reach for a Facade.
 
+### Bridge – `src/Structural/Bridge`
+Warehouse shipping labels on thermal printers: the label kind (standard, return with swapped addresses and a banner, dangerous goods with a framed UN number) and the printer language (ZPL for newer Zebras, EPL for older ones) vary independently. `ShippingLabel` subclasses decide what goes where and build it from primitives (`text()`, `barcode()`, `box()`) offered by a `LabelPrinterLanguage`, so 3 label kinds × 2 languages take 3 + 2 classes instead of 6, and a new label or printer is one class.
+
+Use it when two dimensions vary independently and the implementation side can offer low-level primitives the abstraction composes into higher-level operations. If only one dimension varies, an interface injected through the constructor is enough; if you are fitting an existing incompatible API, that is an Adapter; and if every combination needs its own layout, the split is artificial.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -168,6 +173,11 @@ Stosuj tylko wtedy, gdy „dokładnie jedna na proces” wynika ze sprzętu lub 
 Płatności kartą w sklepie internetowym: checkout zależy od własnego `PaymentGateway` (kwoty jako `int` w groszach, enum `PaymentStatus`, `RefundRejectedException`), a SDK PayU i Stripe mówią każde swoim językiem: z jednej strony tablice z kwotami jako stringi i kody statusów, z drugiej obiekty, statusy małymi literami i wyjątki vendora. `PayUPaymentGateway` i `StripePaymentGateway` tłumaczą jednostki, statusy i błędy, więc żaden typ dostawcy nie przecieka dalej; te same testy przechodzą przez oba adaptery.
 
 Stosuj, gdy musisz podłączyć kod, którego nie możesz zmienić (SDK, moduł legacy), pod interfejs, który twoja aplikacja już definiuje. Jeśli obie strony są twoje, zmień interfejs zamiast go owijać; jeśli zewnętrzne API już pasuje, adapter przekazujący tylko wywołania jest zbędną warstwą; gdy chcesz uprościć duże API, a nie dopasować je do istniejącego kontraktu, sięgnij po Facade.
+
+### Bridge – `src/Structural/Bridge`
+Etykiety wysyłkowe w magazynie na drukarkach termicznych: rodzaj etykiety (standardowa, zwrotna z zamienionymi adresami i banerem, z towarem niebezpiecznym i numerem UN w ramce) i język drukarki (ZPL dla nowszych Zebr, EPL dla starszych) zmieniają się niezależnie. Podklasy `ShippingLabel` decydują, co i gdzie jest na etykiecie, i budują ją z prymitywów (`text()`, `barcode()`, `box()`) dostarczanych przez `LabelPrinterLanguage`, więc 3 rodzaje × 2 języki to 3 + 2 klasy zamiast 6, a nowa etykieta lub drukarka to jedna klasa.
+
+Stosuj, gdy dwa wymiary zmieniają się niezależnie, a strona implementacji może dać prymitywy niskiego poziomu, z których abstrakcja składa operacje wyższego poziomu. Gdy zmienia się tylko jeden wymiar, wystarczy interfejs wstrzyknięty przez konstruktor; gdy dopasowujesz istniejące niezgodne API, to Adapter; gdy każda kombinacja wymaga własnego układu, rozdział jest sztuczny.
 
 ## Korporacyjne (PoEAA)
 
