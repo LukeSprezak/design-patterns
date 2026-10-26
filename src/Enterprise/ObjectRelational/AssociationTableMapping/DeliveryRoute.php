@@ -12,12 +12,17 @@ final class DeliveryRoute
 
     public function __construct(
         public readonly int $id,
-        public readonly string $courierName,
+        public private(set) string $courierName,
         Shipment ...$shipments,
     ) {
         foreach ($shipments as $shipment) {
             $this->load($shipment);
         }
+    }
+
+    public function reassignTo(string $courierName): void
+    {
+        $this->courierName = $courierName;
     }
 
     public function load(Shipment $shipment): void

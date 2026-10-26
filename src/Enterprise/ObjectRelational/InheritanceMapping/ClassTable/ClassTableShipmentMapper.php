@@ -8,6 +8,7 @@ use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\Palle
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\ParcelShipment;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\Shipment;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\ShipmentType;
+use DesignPatterns\Enterprise\DomainLogic\ServiceLayer\TransactionManager;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\ShipmentMapper;
 use PDO;
 
@@ -23,25 +24,30 @@ final readonly class ClassTableShipmentMapper implements ShipmentMapper
         LEFT JOIN pallet_shipments ON pallet_shipments.tracking_number = shipments.tracking_number
         SQL;
 
-    public function __construct(private PDO $connection)
-    {
+    public function __construct(
+        private PDO $connection,
+        private TransactionManager $transactions,
+    ) {
     }
 
+    /** One row per class level, so both inserts succeed or neither does. */
     #[\Override]
     public function insert(Shipment $shipment): void
     {
-        $this->connection
-            ->prepare('INSERT INTO shipments (tracking_number, type, sender_name) VALUES (?, ?, ?)')
-            ->execute([$shipment->trackingNumber, ShipmentType::of($shipment)->value, $shipment->senderName]);
+        $this->transactions->transactional(function () use ($shipment): void {
+            $this->connection
+                ->prepare('INSERT INTO shipments (tracking_number, type, sender_name) VALUES (?, ?, ?)')
+                ->execute([$shipment->trackingNumber, ShipmentType::of($shipment)->value, $shipment->senderName]);
 
-        match (true) {
-            $shipment instanceof ParcelShipment => $this->connection
-                ->prepare('INSERT INTO parcel_shipments (tracking_number, weight_in_grams) VALUES (?, ?)')
-                ->execute([$shipment->trackingNumber, $shipment->weightInGrams]),
-            $shipment instanceof PalletShipment => $this->connection
-                ->prepare('INSERT INTO pallet_shipments (tracking_number, pallet_count, exchanges_euro_pallets) VALUES (?, ?, ?)')
-                ->execute([$shipment->trackingNumber, $shipment->palletCount, (int) $shipment->exchangesEuroPallets]),
-        };
+            match (true) {
+                $shipment instanceof ParcelShipment => $this->connection
+                    ->prepare('INSERT INTO parcel_shipments (tracking_number, weight_in_grams) VALUES (?, ?)')
+                    ->execute([$shipment->trackingNumber, $shipment->weightInGrams]),
+                $shipment instanceof PalletShipment => $this->connection
+                    ->prepare('INSERT INTO pallet_shipments (tracking_number, pallet_count, exchanges_euro_pallets) VALUES (?, ?, ?)')
+                    ->execute([$shipment->trackingNumber, $shipment->palletCount, (int) $shipment->exchangesEuroPallets]),
+            };
+        });
     }
 
     #[\Override]

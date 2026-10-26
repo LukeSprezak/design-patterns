@@ -6,6 +6,7 @@ namespace DesignPatterns\Tests\Enterprise\ObjectRelational\InheritanceMapping;
 
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\ClassTable\ClassTableShipmentMapper;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\ClassTable\ClassTableShipmentSchema;
+use DesignPatterns\Enterprise\DataSource\DataMapper\PdoTransactionManager;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\PalletShipment;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\Shipment\ParcelShipment;
 use DesignPatterns\Enterprise\ObjectRelational\InheritanceMapping\ShipmentMapper;
@@ -33,7 +34,7 @@ final class ShipmentMapperTest extends TestCase
 
         $classTableConnection = new PDO('sqlite::memory:', options: [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
         ClassTableShipmentSchema::create($classTableConnection);
-        yield 'class table inheritance' => [new ClassTableShipmentMapper($classTableConnection)];
+        yield 'class table inheritance' => [new ClassTableShipmentMapper($classTableConnection, new PdoTransactionManager($classTableConnection))];
     }
 
     #[Test]

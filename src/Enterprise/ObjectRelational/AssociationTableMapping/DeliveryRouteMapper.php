@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace DesignPatterns\Enterprise\ObjectRelational\AssociationTableMapping;
 
+use DesignPatterns\Enterprise\DomainLogic\ServiceLayer\TransactionManager;
 use PDO;
 
 final readonly class DeliveryRouteMapper
 {
-    public function __construct(private PDO $connection)
-    {
+    public function __construct(
+        private PDO $connection,
+        private TransactionManager $transactions,
+    ) {
     }
 
     public function insert(DeliveryRoute $route): void
@@ -48,16 +51,22 @@ final readonly class DeliveryRouteMapper
     /** Diffs the in-memory shipments against the stored association rows and writes only the difference. */
     public function save(DeliveryRoute $route): void
     {
-        $storedStatement = $this->connection->prepare('SELECT tracking_number FROM route_shipments WHERE route_id = ?');
-        $storedStatement->execute([$route->id]);
-        $storedTrackingNumbers = $storedStatement->fetchAll(PDO::FETCH_COLUMN);
-        $currentTrackingNumbers = array_keys($route->shipments);
+        $this->transactions->transactional(function () use ($route): void {
+            $this->connection
+                ->prepare('UPDATE delivery_routes SET courier_name = ? WHERE id = ?')
+                ->execute([$route->courierName, $route->id]);
 
-        $deleteStatement = $this->connection->prepare('DELETE FROM route_shipments WHERE route_id = ? AND tracking_number = ?');
-        foreach (array_diff($storedTrackingNumbers, $currentTrackingNumbers) as $unloadedTrackingNumber) {
-            $deleteStatement->execute([$route->id, $unloadedTrackingNumber]);
-        }
-        $this->insertAssociations($route->id, array_diff($currentTrackingNumbers, $storedTrackingNumbers));
+            $storedStatement = $this->connection->prepare('SELECT tracking_number FROM route_shipments WHERE route_id = ?');
+            $storedStatement->execute([$route->id]);
+            $storedTrackingNumbers = $storedStatement->fetchAll(PDO::FETCH_COLUMN);
+            $currentTrackingNumbers = array_keys($route->shipments);
+
+            $deleteStatement = $this->connection->prepare('DELETE FROM route_shipments WHERE route_id = ? AND tracking_number = ?');
+            foreach (array_diff($storedTrackingNumbers, $currentTrackingNumbers) as $unloadedTrackingNumber) {
+                $deleteStatement->execute([$route->id, $unloadedTrackingNumber]);
+            }
+            $this->insertAssociations($route->id, array_diff($currentTrackingNumbers, $storedTrackingNumbers));
+        });
     }
 
     /** @param iterable<string> $trackingNumbers */
