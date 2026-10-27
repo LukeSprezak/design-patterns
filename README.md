@@ -48,6 +48,11 @@ Ordering medical lab tests: a patient picks single tests and packages, and packa
 
 Use it when data forms a tree of arbitrary depth and clients should treat a single element and a group the same way through operations that recurse. A flat list needs only an array; if leaves and groups share few operations, a common interface forces empty implementations; and a tree that is only displayed is simpler as a recursive function over plain data.
 
+### Decorator – `src/Structural/Decorator`
+NBP exchange rates for foreign-currency invoices: Polish VAT law requires the mid rate from the last business day before the invoice date. Around a plain `ExchangeRateProvider`, `PrecedingBusinessDayExchangeRateProvider` steps back over weekends and holidays (an invoice from the Tuesday after Easter gets the Good Friday rate) and `CachingExchangeRateProvider` remembers rates, which never change once published. Both implement the same interface, so they stack in any order, and the order matters: the cache on the outside remembers the whole walk back, on the inside only the single days that had a table.
+
+Use it for optional, independent behaviour (caching, retries, logging, business fallbacks) that you combine differently per context without touching the wrapped class or the client. If the behaviour is always required, put it in the class; if you need a different interface, that is an Adapter; if your framework already ships the decorator (Symfony's `CachingHttpClient`, `RetryableHttpClient`), use it; and assemble long chains in one place, the DI container, because the order is easy to get wrong.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -188,6 +193,11 @@ Stosuj, gdy dwa wymiary zmieniają się niezależnie, a strona implementacji mo�
 Zamawianie badań laboratoryjnych: pacjent wybiera badania pojedyncze i pakiety, a pakiety się zagnieżdżają (pakiet kardiologiczny zawiera lipidogram, który zawiera cztery badania). `SingleLabTest` i `LabTestPackage` dzielą interfejs `LabTest`, więc wywołujący nigdy nie sprawdza, co ma w ręku, a każda operacja agreguje według własnej reguły: cena sumuje dzieci i nakłada rabat każdego poziomu, czas oczekiwania to najwolniejsze dziecko, a typy próbek to suma zbiorów, więc jedna probówka obsługuje wszystkie badania, które jej potrzebują. Dzieci trafiają do konstruktora pakietu, dzięki czemu `add()`/`remove()` nie ma we wspólnym interfejsie.
 
 Stosuj, gdy dane tworzą drzewo dowolnej głębokości, a klient ma traktować pojedynczy element i grupę jednakowo przez operacje, które schodzą rekurencyjnie. Płaska lista potrzebuje tylko tablicy; gdy liście i grupy mają mało wspólnych operacji, wspólny interfejs wymusza puste implementacje; drzewo tylko do wyświetlenia jest prostsze jako rekurencyjna funkcja po zwykłych danych.
+
+### Decorator – `src/Structural/Decorator`
+Kursy walut NBP na fakturach w walucie obcej: ustawa o VAT wymaga średniego kursu z ostatniego dnia roboczego przed datą faktury. Wokół zwykłego `ExchangeRateProvider` `PrecedingBusinessDayExchangeRateProvider` cofa się przez weekendy i święta (faktura z wtorku po Wielkanocy dostaje kurs z Wielkiego Piątku), a `CachingExchangeRateProvider` zapamiętuje kursy, które po publikacji już się nie zmieniają. Oba implementują ten sam interfejs, więc składają się w dowolnej kolejności, a kolejność ma znaczenie: cache na zewnątrz zapamiętuje całe cofanie, wewnątrz tylko pojedyncze dni, w których była tabela.
+
+Stosuj do opcjonalnych, niezależnych zachowań (cache, ponawianie, logowanie, biznesowe fallbacki), które składasz różnie w zależności od kontekstu, bez ruszania owijanej klasy i klienta. Gdy zachowanie jest zawsze wymagane, wpisz je w klasę; gdy potrzebujesz innego interfejsu, to Adapter; gdy framework ma gotowy dekorator (`CachingHttpClient`, `RetryableHttpClient` w Symfony), użyj go; długie łańcuchy składaj w jednym miejscu, w kontenerze DI, bo kolejność łatwo pomylić.
 
 ## Korporacyjne (PoEAA)
 
