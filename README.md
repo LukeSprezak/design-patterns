@@ -53,6 +53,11 @@ NBP exchange rates for foreign-currency invoices: Polish VAT law requires the mi
 
 Use it for optional, independent behaviour (caching, retries, logging, business fallbacks) that you combine differently per context without touching the wrapped class or the client. If the behaviour is always required, put it in the class; if you need a different interface, that is an Adapter; if your framework already ships the decorator (Symfony's `CachingHttpClient`, `RetryableHttpClient`), use it; and assemble long chains in one place, the DI container, because the order is easy to get wrong.
 
+### Facade – `src/Structural/Facade`
+Submitting an invoice to KSeF, the Polish national e-invoicing system: authentication (challenge, KSeF token, access token), AES-256 encryption of the invoice XML with SHA-256 hashes, opening an online session, sending the invoice, reading its KSeF number and closing the session are spread across the `Ksef/` subsystem and must happen in this exact order. `KsefInvoiceSubmission::submit($invoiceXml)` does it in one call, so the sales module never touches tokens, keys or sessions. The tests run against an in-memory KSeF that refuses any step taken out of order and decrypts the invoice with the session key.
+
+Use it when a subsystem is genuinely complex and most clients need one or two common use cases from it; the subsystem stays available for the rest. Skip it when the subsystem is a single class with a simple API, and do not let the facade swallow every use case and grow into a god object (bulk sessions or offline mode go straight to the subsystem or get their own facade). Unlike an Adapter, which fits an API to an existing interface, a Facade defines a new, simpler one.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -198,6 +203,11 @@ Stosuj, gdy dane tworzą drzewo dowolnej głębokości, a klient ma traktować p
 Kursy walut NBP na fakturach w walucie obcej: ustawa o VAT wymaga średniego kursu z ostatniego dnia roboczego przed datą faktury. Wokół zwykłego `ExchangeRateProvider` `PrecedingBusinessDayExchangeRateProvider` cofa się przez weekendy i święta (faktura z wtorku po Wielkanocy dostaje kurs z Wielkiego Piątku), a `CachingExchangeRateProvider` zapamiętuje kursy, które po publikacji już się nie zmieniają. Oba implementują ten sam interfejs, więc składają się w dowolnej kolejności, a kolejność ma znaczenie: cache na zewnątrz zapamiętuje całe cofanie, wewnątrz tylko pojedyncze dni, w których była tabela.
 
 Stosuj do opcjonalnych, niezależnych zachowań (cache, ponawianie, logowanie, biznesowe fallbacki), które składasz różnie w zależności od kontekstu, bez ruszania owijanej klasy i klienta. Gdy zachowanie jest zawsze wymagane, wpisz je w klasę; gdy potrzebujesz innego interfejsu, to Adapter; gdy framework ma gotowy dekorator (`CachingHttpClient`, `RetryableHttpClient` w Symfony), użyj go; długie łańcuchy składaj w jednym miejscu, w kontenerze DI, bo kolejność łatwo pomylić.
+
+### Facade – `src/Structural/Facade`
+Wysyłka faktury do KSeF: uwierzytelnienie (challenge, token KSeF, access token), szyfrowanie XML faktury AES-256 ze skrótami SHA-256, otwarcie sesji interaktywnej, wysłanie faktury, odczyt numeru KSeF i zamknięcie sesji są rozłożone na podsystem `Ksef/` i muszą zajść dokładnie w tej kolejności. `KsefInvoiceSubmission::submit($invoiceXml)` robi to jednym wywołaniem, więc moduł sprzedaży nie dotyka tokenów, kluczy ani sesji. Testy działają na KSeF in-memory, który odrzuca każdy krok wykonany poza kolejnością i odszyfrowuje fakturę kluczem sesji.
+
+Stosuj, gdy podsystem jest naprawdę złożony, a większość klientów potrzebuje z niego jednego, dwóch typowych przypadków użycia; podsystem zostaje dostępny dla pozostałych. Pomiń, gdy podsystem to jedna klasa z prostym API, i nie pozwól fasadzie połykać wszystkich przypadków użycia i rosnąć w god object (sesja wsadowa czy tryb offline idą wprost do podsystemu albo dostają własną fasadę). W przeciwieństwie do Adaptera, który dopasowuje API do istniejącego interfejsu, Facade definiuje nowy, prostszy.
 
 ## Korporacyjne (PoEAA)
 
