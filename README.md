@@ -58,6 +58,11 @@ Submitting an invoice to KSeF, the Polish national e-invoicing system: authentic
 
 Use it when a subsystem is genuinely complex and most clients need one or two common use cases from it; the subsystem stays available for the rest. Skip it when the subsystem is a single class with a simple API, and do not let the facade swallow every use case and grow into a god object (bulk sessions or offline mode go straight to the subsystem or get their own facade). Unlike an Adapter, which fits an API to an existing interface, a Facade defines a new, simpler one.
 
+### Flyweight – `src/Structural/Flyweight`
+Stocktaking at a pharmaceutical wholesaler: a WMS export has a row per lot and location, millions of rows for tens of thousands of products, each row repeating the product's EAN, name, manufacturer, ATC code, price and storage temperature range. `ProductPool` hands out one immutable `Product` per EAN (intrinsic state), while `StockLot` keeps only what is unique to the row: lot number, expiry date, location, storage zone and quantity (extrinsic state). The flyweight's behaviour takes the extrinsic state as an argument, `valueInCents($quantity)` and `canBeStoredIn($storageZone)`, which lets `StockCountReport` catch insulin left on an ambient shelf.
+
+Use it when a long-running process holds a great many objects at once and a large part of their state is repeated and immutable, drawn from an open set of values that come from data. In a typical PHP request the savings are negligible; for a closed set known in code use an enum, whose cases are PHP's built-in flyweights; if the data can be streamed row by row, the memory problem disappears without the pattern; and do not confuse it with Identity Map, which shares objects for consistency, not memory.
+
 ## Enterprise (PoEAA)
 
 Patterns from Martin Fowler's *Patterns of Enterprise Application Architecture*, grouped the way the book groups them.
@@ -208,6 +213,11 @@ Stosuj do opcjonalnych, niezależnych zachowań (cache, ponawianie, logowanie, b
 Wysyłka faktury do KSeF: uwierzytelnienie (challenge, token KSeF, access token), szyfrowanie XML faktury AES-256 ze skrótami SHA-256, otwarcie sesji interaktywnej, wysłanie faktury, odczyt numeru KSeF i zamknięcie sesji są rozłożone na podsystem `Ksef/` i muszą zajść dokładnie w tej kolejności. `KsefInvoiceSubmission::submit($invoiceXml)` robi to jednym wywołaniem, więc moduł sprzedaży nie dotyka tokenów, kluczy ani sesji. Testy działają na KSeF in-memory, który odrzuca każdy krok wykonany poza kolejnością i odszyfrowuje fakturę kluczem sesji.
 
 Stosuj, gdy podsystem jest naprawdę złożony, a większość klientów potrzebuje z niego jednego, dwóch typowych przypadków użycia; podsystem zostaje dostępny dla pozostałych. Pomiń, gdy podsystem to jedna klasa z prostym API, i nie pozwól fasadzie połykać wszystkich przypadków użycia i rosnąć w god object (sesja wsadowa czy tryb offline idą wprost do podsystemu albo dostają własną fasadę). W przeciwieństwie do Adaptera, który dopasowuje API do istniejącego interfejsu, Facade definiuje nowy, prostszy.
+
+### Flyweight – `src/Structural/Flyweight`
+Inwentaryzacja w hurtowni farmaceutycznej: eksport z WMS ma wiersz na partię i lokalizację, miliony wierszy dla dziesiątek tysięcy produktów, a każdy wiersz powtarza EAN, nazwę, producenta, kod ATC, cenę i zakres temperatury przechowywania produktu. `ProductPool` wydaje jeden niezmienny `Product` na EAN (stan wewnętrzny), a `StockLot` trzyma tylko to, co unikalne dla wiersza: numer partii, datę ważności, lokalizację, strefę magazynu i ilość (stan zewnętrzny). Zachowania flyweighta przyjmują stan zewnętrzny jako argument, `valueInCents($quantity)` i `canBeStoredIn($storageZone)`, dzięki czemu `StockCountReport` wyłapuje insulinę na regale w temperaturze pokojowej.
+
+Stosuj, gdy długi proces trzyma naraz bardzo dużo obiektów, a duża część ich stanu jest powtarzalna i niezmienna, z otwartego zbioru wartości pochodzących z danych. W typowym requeście PHP oszczędność jest pomijalna; dla zamkniętego zbioru znanego w kodzie użyj enuma, którego przypadki to wbudowane flyweighty PHP; gdy dane da się przetwarzać strumieniowo wiersz po wierszu, problem pamięci znika bez wzorca; nie myl go z Identity Map, który współdzieli obiekty dla spójności, a nie pamięci.
 
 ## Korporacyjne (PoEAA)
 
